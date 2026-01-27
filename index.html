@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borjão Skins - CS Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --purple: #9431ce;
+            --black: #000000;
+            --dark-gray: #0a0a0a;
+            --purple-glow: rgba(148, 49, 206, 0.4);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--black);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, var(--purple-glow) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--purple-glow) 0%, transparent 50%);
+            animation: bgRotate 20s linear infinite;
+        }
+
+        @keyframes bgRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(148, 49, 206, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 49, 206, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Logo Section */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: float-logo 3s ease-in-out infinite;
+        }
+
+        @keyframes float-logo {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 10px 30px var(--purple-glow)) 
+                    drop-shadow(0 0 60px var(--purple-glow));
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% {
+                filter: drop-shadow(0 10px 30px var(--purple-glow)) 
+                        drop-shadow(0 0 60px var(--purple-glow));
+            }
+            50% {
+                filter: drop-shadow(0 15px 50px var(--purple-glow)) 
+                        drop-shadow(0 0 90px var(--purple-glow));
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 40px var(--purple-glow),
+                    0 0 80px var(--purple-glow),
+                    inset 0 0 20px rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 60px var(--purple-glow),
+                    0 0 120px var(--purple-glow),
+                    inset 0 0 30px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .logo::before {
+            display: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo::after {
+            display: none;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, white, var(--purple), white);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        @keyframes shimmer {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .subtitle {
+            font-size: 18px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Links Section */
+        .links {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .link-item {
+            position: relative;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .link-item:nth-child(1) { animation-delay: 0.2s; }
+        .link-item:nth-child(2) { animation-delay: 0.4s; }
+        .link-item:nth-child(3) { animation-delay: 0.6s; }
+        .link-item:nth-child(4) { animation-delay: 0.8s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 25px 30px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid rgba(148, 49, 206, 0.3);
+            border-radius: 15px;
+            text-decoration: none;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .link-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(148, 49, 206, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .link-btn:hover::before {
+            left: 100%;
+        }
+
+        .link-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, var(--purple-glow), transparent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .link-btn:hover::after {
+            width: 500px;
+            height: 500px;
+        }
+
+        .link-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--purple);
+            box-shadow: 
+                0 10px 40px var(--purple-glow),
+                inset 0 0 20px rgba(148, 49, 206, 0.1);
+        }
+
+        .link-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .link-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--purple), #6b1fa0);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px var(--purple-glow);
+            transition: transform 0.3s;
+        }
+
+        .link-btn:hover .link-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .link-text {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .link-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .link-desc {
+            font-size: 14px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+        }
+
+        .link-arrow {
+            position: relative;
+            z-index: 1;
+            font-size: 28px;
+            transition: transform 0.3s;
+        }
+
+        .link-btn:hover .link-arrow {
+            transform: translateX(10px);
+        }
+
+        /* Specific link colors */
+        .link-whatsapp:hover {
+            border-color: #25D366;
+        }
+
+        .link-rifas:hover {
+            border-color: #FFD700;
+        }
+
+        .link-inventario:hover {
+            border-color: #FF6B6B;
+        }
+
+        .link-instagram:hover {
+            border-color: #E1306C;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            opacity: 0.5;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            animation: fadeIn 2s ease-out 1s backwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.5; }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--purple);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                opacity: 0;
+                transform: translateY(0) translateX(0);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100vh) translateX(50px);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .logo {
+                width: 120px;
+                height: 120px;
+            }
+
+            .logo img {
+                width: 100%;
+                height: 100%;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+                letter-spacing: 2px;
+            }
+
+            .link-btn {
+                padding: 20px 20px;
+                font-size: 18px;
+            }
+
+            .link-title {
+                font-size: 18px;
+            }
+
+            .link-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="container">
+        <div class="logo-section">
+            <div class="logo">
+                <img src="images/logodb.png" alt="Logo Borjão Skins">
+            </div>
+            <h1 class="title">Borjão Skins</h1>
+            <p class="subtitle">Skins • Rifas • VIP</p>
+        </div>
+
+        <div class="links">
+            <div class="link-item">
+                <a href="https://wa.me/seu-numero-aqui" class="link-btn link-whatsapp" target="_blank">
+                    <div class="link-content">
+                        <div class="link-icon">💬</div>
+                        <div class="link-text">
+                            <span class="link-title">WhatsApp</span>
+                            <span class="link-desc">Atendimento 24/7</span>
+                        </div>
+                    </div>
+                    <span class="link-arrow">→</span>
+                </a>
+            </div>
+
+            <div class="link-item">
+                <a href="https://seu-link-rifas.com" class="link-btn link-rifas" target="_blank">
+                    <div class="link-content">
+                        <div class="link-icon">🎰</div>
+                        <div class="link-text">
+                            <span class="link-title">Rifas VIP</span>
+                            <span class="link-desc">Ganhe skins raras</span>
+                        </div>
+                    </div>
+                    <span class="link-arrow">→</span>
+                </a>
+            </div>
+
+            <div class="link-item">
+                <a href="https://seu-link-inventario.com" class="link-btn link-inventario" target="_blank">
+                    <div class="link-content">
+                        <div class="link-icon">🔫</div>
+                        <div class="link-text">
+                            <span class="link-title">Inventário</span>
+                            <span class="link-desc">Confira as skins disponíveis</span>
+                        </div>
+                    </div>
+                    <span class="link-arrow">→</span>
+                </a>
+            </div>
+
+            <div class="link-item">
+                <a href="https://instagram.com/seu-usuario" class="link-btn link-instagram" target="_blank">
+                    <div class="link-content">
+                        <div class="link-icon">📸</div>
+                        <div class="link-text">
+                            <span class="link-title">Instagram</span>
+                            <span class="link-desc">Acompanhe novidades</span>
+                        </div>
+                    </div>
+                    <span class="link-arrow">→</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            Desenvolvido por hive.mkt com 💖
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 10000);
+        }
+
+        // Generate particles periodically
+        setInterval(createParticle, 500);
+
+        // Add hover sound effect simulation (visual feedback)
+        document.querySelectorAll('.link-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+        });
+    </script>
+</body>
+</html>
