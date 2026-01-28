@@ -11,11 +11,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         :root {
             --purple: #9431ce;
             --black: #000000;
+            --dark-gray: #0a0a0a;
             --purple-glow: rgba(148, 49, 206, 0.4);
         }
 
@@ -26,37 +31,53 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
+        /* Animated background */
         .bg-animation {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0; overflow: hidden;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
         }
 
         .bg-animation::before {
             content: '';
             position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
             background: 
                 radial-gradient(circle at 20% 50%, var(--purple-glow) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, var(--purple-glow) 0%, transparent 50%);
             animation: bgRotate 20s linear infinite;
+            will-change: transform;
         }
 
-        @keyframes bgRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes bgRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 640px) {
+            .bg-animation::before {
+                animation: bgRotate 30s linear infinite;
+            }
+        }
 
         .grid-overlay {
             position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background-image:
-                linear-gradient(rgba(148,49,206,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(148,49,206,0.03) 1px, transparent 1px);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(148, 49, 206, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 49, 206, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
             z-index: 1;
             pointer-events: none;
@@ -66,20 +87,36 @@
             position: relative;
             z-index: 2;
             max-width: 600px;
-            width: 100%;
-            padding: 20px;
+            margin: 0 auto;
+            padding: 40px 20px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            text-align: center;
         }
 
-        /* Logo */
+        /* Logo Section */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .logo {
-            width: 400px; height: 400px;
-            margin-bottom: 40px;
+            width: 500px;
+            height: 500px;
+            margin: 0 auto 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -88,28 +125,91 @@
         }
 
         @keyframes float-logo {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .logo img {
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
+            position: relative;
+            z-index: 2;
             filter: drop-shadow(0 10px 30px var(--purple-glow));
+            will-change: transform;
         }
 
-        /* Links */
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 40px var(--purple-glow),
+                    0 0 80px var(--purple-glow),
+                    inset 0 0 20px rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 60px var(--purple-glow),
+                    0 0 120px var(--purple-glow),
+                    inset 0 0 30px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .logo::before {
+            display: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo::after {
+            display: none;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, white, var(--purple), white);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        @keyframes shimmer {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .subtitle {
+            font-size: 18px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Links Section */
         .links {
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            align-items: center;
         }
 
         .link-item {
-            width: 100%;
-            max-width: 400px;
+            position: relative;
             animation: fadeInUp 0.8s ease-out backwards;
         }
 
@@ -117,104 +217,245 @@
         .link-item:nth-child(2) { animation-delay: 0.4s; }
         .link-item:nth-child(3) { animation-delay: 0.6s; }
         .link-item:nth-child(4) { animation-delay: 0.8s; }
+        .link-item:nth-child(5) { animation-delay: 1s; }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .link-btn {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 25px 30px;
-            background: rgba(10,10,10,0.8);
-            border: 2px solid rgba(148,49,206,0.3);
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid rgba(148, 49, 206, 0.3);
             border-radius: 15px;
             text-decoration: none;
             color: white;
             font-size: 20px;
             font-weight: 600;
             letter-spacing: 1px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
-            transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
         }
 
         .link-btn::before {
-            content:'';
-            position:absolute; top:0; left:-100%; width:100%; height:100%;
-            background: linear-gradient(90deg, transparent, rgba(148,49,206,0.3), transparent);
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(148, 49, 206, 0.3), transparent);
             transition: left 0.6s;
         }
 
-        .link-btn:hover::before { left:100%; }
+        .link-btn:hover::before {
+            left: 100%;
+        }
 
         .link-btn::after {
-            content:'';
-            position:absolute; top:50%; left:50%;
-            width:0; height:0;
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
             background: radial-gradient(circle, var(--purple-glow), transparent);
-            border-radius:50%;
-            transform: translate(-50%,-50%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
             transition: width 0.6s, height 0.6s;
         }
 
-        .link-btn:hover::after { width:500px; height:500px; }
+        .link-btn:hover::after {
+            width: 500px;
+            height: 500px;
+        }
 
         .link-btn:hover {
             transform: translateY(-5px) scale(1.02);
             border-color: var(--purple);
-            box-shadow: 0 10px 40px var(--purple-glow), inset 0 0 20px rgba(148,49,206,0.1);
+            box-shadow: 
+                0 10px 40px var(--purple-glow),
+                inset 0 0 20px rgba(148, 49, 206, 0.1);
         }
 
         .link-content {
-            display:flex; align-items:center; gap:20px; position:relative; z-index:1;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .link-icon {
-            width:50px; height:50px;
-            background: linear-gradient(135deg,var(--purple),#6b1fa0);
-            border-radius:12px;
-            display:flex; align-items:center; justify-content:center;
-            font-size:24px; box-shadow:0 4px 15px var(--purple-glow);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--purple), #6b1fa0);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px var(--purple-glow);
             transition: transform 0.3s;
         }
 
-        .link-btn:hover .link-icon { transform: rotate(10deg) scale(1.1); }
+        .link-btn:hover .link-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
 
-        .link-text { display:flex; flex-direction:column; gap:5px; }
-        .link-title { font-family:'Orbitron', sans-serif; font-size:22px; font-weight:700; text-transform:uppercase; }
-        .link-desc { font-size:14px; font-weight:300; color:rgba(255,255,255,0.6); letter-spacing:1px; }
-        .link-arrow { font-size:28px; transition: transform 0.3s; }
-        .link-btn:hover .link-arrow { transform: translateX(10px); }
+        .link-text {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .link-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .link-desc {
+            font-size: 14px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+        }
+
+        .link-arrow {
+            position: relative;
+            z-index: 1;
+            font-size: 28px;
+            transition: transform 0.3s;
+        }
+
+        .link-btn:hover .link-arrow {
+            transform: translateX(10px);
+        }
 
         /* Specific link colors */
-        .link-whatsapp:hover { border-color:#25D366; }
-        .link-rifas:hover { border-color:#FFD700; }
-        .link-inventario:hover { border-color:#FF6B6B; }
-        .link-instagram:hover { border-color:#E1306C; }
+        .link-whatsapp:hover {
+            border-color: #25D366;
+        }
+
+        .link-rifas:hover {
+            border-color: #FFD700;
+        }
+
+        .link-inventario:hover {
+            border-color: #FF6B6B;
+        }
+
+        .link-instagram:hover {
+            border-color: #E1306C;
+        }
 
         /* Footer */
-        .footer { margin-top:40px; text-align:center; opacity:0.5; font-size:14px; font-weight:300; letter-spacing:2px; }
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            opacity: 0.5;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            animation: fadeIn 2s ease-out 1s backwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.5; }
+        }
 
         /* Floating particles */
         .particle {
-            position: fixed; width:4px; height:4px; background:var(--purple); border-radius:50%;
-            pointer-events:none; z-index:1; opacity:0; animation: float 8s ease-in-out infinite;
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--purple);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            animation: float 8s ease-in-out infinite;
         }
 
         @keyframes float {
-            0%,100% { opacity:0; transform:translateY(0) translateX(0); }
-            10% { opacity:1; }
-            90% { opacity:0.5; }
-            100% { opacity:0; transform:translateY(-100vh) translateX(50px); }
+            0%, 100% {
+                opacity: 0;
+                transform: translateY(0) translateX(0);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100vh) translateX(50px);
+            }
         }
 
-        @media(max-width:640px){
-            .logo { width:300px; height:300px; margin-bottom:30px; }
-            .link-btn { padding:20px 20px; font-size:18px; }
-            .link-title { font-size:18px; }
-            .link-icon { width:40px; height:40px; font-size:20px; }
+        @media (max-width: 640px) {
+            .logo {
+                width: 400px;
+                height: 400px;
+                margin: 0 auto 30px;
+            }
+
+            .logo img {
+                width: 100%;
+                height: 100%;
+            }
+
+            .container {
+                padding: 30px 20px;
+                justify-content: center;
+            }
+
+            .logo-section {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+                letter-spacing: 2px;
+            }
+
+            .link-btn {
+                padding: 20px 20px;
+                font-size: 18px;
+            }
+
+            .link-title {
+                font-size: 18px;
+            }
+
+            .link-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -223,13 +464,15 @@
     <div class="grid-overlay"></div>
 
     <div class="container">
-        <div class="logo">
-            <img src="images/logodb.png" alt="Logo Borjão Skins">
+        <div class="logo-section">
+            <div class="logo">
+                <img src="images/logodb.png" alt="Logo Borjão Skins">
+            </div>
         </div>
 
         <div class="links">
             <div class="link-item">
-                <a href="https://wa.me/message/X3KSSM3LSJLKN1" class="link-btn link-whatsapp" target="_blank">
+                <a href="https://wa.me/seu-numero-aqui" class="link-btn link-whatsapp" target="_blank">
                     <div class="link-content">
                         <div class="link-icon">💬</div>
                         <div class="link-text">
@@ -242,7 +485,20 @@
             </div>
 
             <div class="link-item">
-                <a href="https://chat.whatsapp.com/HfHwFKxaGCW6EvMqGNrqWP?mode=gi_t" class="link-btn link-rifas" target="_blank">
+                <a href="vender-skins.html" class="link-btn link-inventario">
+                    <div class="link-content">
+                        <div class="link-icon">💰</div>
+                        <div class="link-text">
+                            <span class="link-title">Vender Minhas Skins</span>
+                            <span class="link-desc">Melhor preço do mercado</span>
+                        </div>
+                    </div>
+                    <span class="link-arrow">→</span>
+                </a>
+            </div>
+
+            <div class="link-item">
+                <a href="https://seu-link-rifas.com" class="link-btn link-rifas" target="_blank">
                     <div class="link-content">
                         <div class="link-icon">🎰</div>
                         <div class="link-text">
@@ -255,7 +511,7 @@
             </div>
 
             <div class="link-item">
-                <a href="https://steamcommunity.com/tradeoffer/new/?partner=187592372&token=iAU2mlJM" class="link-btn link-inventario" target="_blank">
+                <a href="https://seu-link-inventario.com" class="link-btn link-inventario" target="_blank">
                     <div class="link-content">
                         <div class="link-icon">🔫</div>
                         <div class="link-text">
@@ -268,7 +524,7 @@
             </div>
 
             <div class="link-item">
-                <a href="https://Instagram.com/borjaoskins" class="link-btn link-instagram" target="_blank">
+                <a href="https://instagram.com/seu-usuario" class="link-btn link-instagram" target="_blank">
                     <div class="link-content">
                         <div class="link-icon">📸</div>
                         <div class="link-text">
@@ -280,22 +536,38 @@
                 </a>
             </div>
         </div>
+
+        <div class="footer">
+            Desenvolvido por hive.mkt com 💖
+        </div>
     </div>
 
     <script>
-        function createParticle(){
-            const particle=document.createElement('div');
-            particle.className='particle';
-            particle.style.left=Math.random()*window.innerWidth+'px';
-            particle.style.animationDelay=Math.random()*8+'s';
-            particle.style.animationDuration=(Math.random()*4+6)+'s';
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
             document.body.appendChild(particle);
-            setTimeout(()=>particle.remove(),10000);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 10000);
         }
 
-        const isMobile=window.innerWidth<=640;
-        const particleInterval=isMobile?2000:500;
+        // Generate particles periodically (less on mobile)
+        const isMobile = window.innerWidth <= 640;
+        const particleInterval = isMobile ? 2000 : 500;
         setInterval(createParticle, particleInterval);
+
+        // Add hover sound effect simulation (visual feedback)
+        document.querySelectorAll('.link-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+        });
     </script>
 </body>
 </html>
