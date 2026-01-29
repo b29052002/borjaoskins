@@ -2,18 +2,17 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Skins em Estoque - Borjão Skins</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
         @font-face {
             font-family: 'Kenyan Coffee';
             src: url('fonts/KENYAN_COFFEE_RG.TTF') format('truetype');
-            font-weight: normal;
-            font-style: normal;
         }
+
         * {
             margin: 0;
             padding: 0;
@@ -22,8 +21,7 @@
 
         :root {
             --purple: #9431ce;
-            --black: #000000;
-            --dark-gray: #0a0a0a;
+            --black: #000;
             --purple-glow: rgba(148, 49, 206, 0.4);
         }
 
@@ -31,37 +29,21 @@
             font-family: 'Rajdhani', sans-serif;
             background: var(--black);
             color: white;
-            min-height: 100vh;
             overflow-x: hidden;
-            position: relative;
         }
 
         .bg-animation {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: 0;
-            overflow: hidden;
-        }
-
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 20% 50%, var(--purple-glow) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, var(--purple-glow) 0%, transparent 50%);
+            background:
+                radial-gradient(circle at 20% 50%, var(--purple-glow), transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--purple-glow), transparent 50%);
             animation: bgRotate 20s linear infinite;
         }
 
         @keyframes bgRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
         .container {
@@ -69,50 +51,43 @@
             z-index: 2;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
+            padding: 16px 12px 24px;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 15px;
+            width: 72px;
+            margin: 0 auto 12px;
         }
 
         .logo img {
             width: 100%;
-            height: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 10px 30px var(--purple-glow));
         }
 
         .title {
-            font-family: 'Kenyan Coffee', 'Orbitron', sans-serif;
-            font-size: 28px;
-            font-weight: 900;
+            font-family: 'Kenyan Coffee';
             color: var(--purple);
-            margin-bottom: 10px;
+            font-size: 24px;
         }
 
         .subtitle {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.7);
+            opacity: .7;
+            font-size: 15px;
         }
 
         .page-indicator {
             text-align: center;
-            font-family: 'Kenyan Coffee', 'Orbitron', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
+            margin: 12px 0;
+            font-family: 'Kenyan Coffee';
             color: var(--purple);
-            margin-bottom: 20px;
         }
 
         .carousel-container {
@@ -121,115 +96,85 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 30px;
+            padding: 0 8px;
         }
 
         .card-wrapper {
             width: 100%;
-            max-width: 800px;
-            position: relative;
-            overflow: hidden;
-            border-radius: 20px;
-            background: rgba(10, 10, 10, 0.8);
+            max-width: 820px;
+            border-radius: 16px;
             border: 2px solid var(--purple);
-            box-shadow: 0 10px 40px var(--purple-glow);
-            touch-action: pan-x pan-y;
+            box-shadow: 0 10px 30px var(--purple-glow);
+            background: rgba(10,10,10,.9);
+            overflow: hidden;
         }
 
         .card-image-container {
-            position: relative;
             width: 100%;
+            max-height: 60vh;
             overflow: hidden;
-            cursor: grab;
-            touch-action: none;
-        }
-
-        .card-image-container:active {
-            cursor: grabbing;
+            touch-action: pan-y pinch-zoom;
+            position: relative;
         }
 
         .card-image {
             width: 100%;
-            height: auto;
-            display: block;
+            height: 100%;
+            object-fit: contain;
+            transform-origin: center;
+            transition: transform .15s ease-out;
             user-select: none;
-            -webkit-user-select: none;
-            transition: transform 0.1s ease-out;
-            transform-origin: center center;
         }
 
         .zoom-hint {
             position: absolute;
-            bottom: 20px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-            pointer-events: none;
-            animation: fadeInOut 3s ease-in-out;
+            font-size: 11px;
+            background: rgba(0,0,0,.75);
+            padding: 6px 14px;
+            border-radius: 20px;
+            animation: fadeOut 4s forwards;
         }
 
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         .nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
-            background: rgba(148, 49, 206, 0.8);
-            border: 2px solid var(--purple);
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
+            background: var(--purple);
             color: white;
-            font-size: 24px;
+            font-size: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s;
             z-index: 10;
-            user-select: none;
         }
 
-        .nav-btn:hover {
-            background: var(--purple);
-            transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 5px 20px var(--purple-glow);
-        }
-
-        .nav-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .nav-btn.prev {
-            left: 10px;
-        }
-
-        .nav-btn.next {
-            right: 10px;
-        }
+        .nav-btn.prev { left: 5px; }
+        .nav-btn.next { right: 5px; }
 
         .cta-section {
-            background: rgba(10, 10, 10, 0.9);
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 16px;
             border: 2px solid var(--purple);
-            border-radius: 20px;
-            padding: 30px;
             text-align: center;
-            backdrop-filter: blur(10px);
-            margin-top: auto;
         }
 
         .cta-text {
-            font-size: 18px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            margin-bottom: 16px;
         }
 
         .cta-highlight {
@@ -240,302 +185,107 @@
         .whatsapp-btn {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 18px 40px;
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            border: none;
-            border-radius: 50px;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 40px;
+            background: linear-gradient(135deg,#25D366,#128C7E);
             color: white;
-            font-family: 'Kenyan Coffee', 'Orbitron', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
+            font-family: 'Kenyan Coffee';
             text-decoration: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 5px 20px rgba(37, 211, 102, 0.4);
+            font-size: 18px;
         }
 
-        .whatsapp-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.6);
-        }
-
-        .whatsapp-btn:active {
-            transform: translateY(-1px);
-        }
-
-        .whatsapp-icon {
-            font-size: 28px;
-        }
-
-        @media (max-width: 768px) {
-            .title {
-                font-size: 22px;
-            }
-
-            .page-indicator {
-                font-size: 18px;
-            }
-
-            .nav-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-            }
-
-            .cta-section {
-                padding: 20px;
-            }
-
-            .cta-text {
-                font-size: 16px;
-            }
-
-            .whatsapp-btn {
-                padding: 15px 30px;
-                font-size: 18px;
-            }
-
-            .zoom-hint {
-                font-size: 12px;
-                padding: 8px 15px;
-            }
-        }
-
-        /* Animações de slide */
-        .slide-enter {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
+        @media (min-width: 769px) {
+            .card-image-container {
+                max-height: 70vh;
             }
         }
     </style>
 </head>
+
 <body>
-    <div class="bg-animation"></div>
+<div class="bg-animation"></div>
 
-    <div class="container">
-        <div class="header">
-            <a href="index.html" style="display: block; width: fit-content; margin: 0 auto;">
-                <div class="logo">
-                    <img src="images/logodb.png" alt="Logo Borjão Skins">
-                </div>
-            </a>
-            <h1 class="title">🔫 SKINS EM ESTOQUE</h1>
-            <p class="subtitle">Confira todas as skins disponíveis</p>
+<div class="container">
+
+    <div class="header">
+        <div class="logo">
+            <img src="images/logodb.png">
         </div>
-
-        <div class="page-indicator" id="pageIndicator">PAG 1</div>
-
-        <div class="carousel-container">
-            <div class="nav-btn prev" onclick="previousCard()">‹</div>
-            
-            <div class="card-wrapper">
-                <div class="card-image-container" id="imageContainer">
-                    <img src="" alt="Estoque de Skins" class="card-image" id="cardImage">
-                    <div class="zoom-hint">📱 Segure e arraste para ver melhor</div>
-                </div>
-            </div>
-
-            <div class="nav-btn next" onclick="nextCard()">›</div>
-        </div>
-
-        <div class="cta-section">
-            <p class="cta-text">
-                Não encontrou a skin que queria em estoque?<br>
-                <span class="cta-highlight">Faça uma encomenda que chega em até 12 horas no seu inventário!</span>
-            </p>
-            <a href="https://wa.me/5521983774946?text=Olá! Gostaria de encomendar uma skin." class="whatsapp-btn" target="_blank">
-                <span class="whatsapp-icon">💬</span>
-                Encomendar no WhatsApp
-            </a>
-        </div>
+        <h1 class="title">🔫 SKINS EM ESTOQUE</h1>
+        <p class="subtitle">Confira todas as skins disponíveis</p>
     </div>
 
-    <script>
-        // Array com as imagens dos cards (4 páginas)
-        const cards = [
-            'images/card1.jpeg', // PAG 1 - Agentes e AK-47
-            'images/card2.jpeg', // PAG 2 - USP-S, P250, Glock, Desert Eagle, TEC-9
-            'images/card3.jpeg', // PAG 3 - M4A4, M4A1-S, AWP, Scout
-            'images/card4.jpeg'  // PAG 4 - Facas e Luvas
-        ];
+    <div class="page-indicator" id="pageIndicator">PAG 1</div>
 
-        let currentCard = 0;
-        let scale = 1;
-        let posX = 0;
-        let posY = 0;
-        let isDragging = false;
-        let startX = 0;
-        let startY = 0;
-        let lastDistance = 0;
+    <div class="carousel-container">
+        <div class="nav-btn prev" onclick="previousCard()">‹</div>
 
-        const imageContainer = document.getElementById('imageContainer');
-        const cardImage = document.getElementById('cardImage');
-        const pageIndicator = document.getElementById('pageIndicator');
+        <div class="card-wrapper">
+            <div class="card-image-container" id="imageContainer">
+                <img class="card-image" id="cardImage">
+                <div class="zoom-hint">🔍 Duplo toque para ampliar</div>
+            </div>
+        </div>
 
-        // Carregar card inicial
-        loadCard(currentCard);
+        <div class="nav-btn next" onclick="nextCard()">›</div>
+    </div>
 
-        function loadCard(index) {
-            cardImage.src = cards[index];
-            cardImage.classList.add('slide-enter');
-            pageIndicator.textContent = `PAG ${index + 1}`;
-            resetZoom();
-            
-            setTimeout(() => {
-                cardImage.classList.remove('slide-enter');
-            }, 300);
+    <div class="cta-section">
+        <p class="cta-text">
+            Não encontrou a skin desejada?<br>
+            <span class="cta-highlight">Encomende e receba em até 12h</span>
+        </p>
+        <a class="whatsapp-btn" href="https://wa.me/5521983774946" target="_blank">
+            💬 Encomendar no WhatsApp
+        </a>
+    </div>
+
+</div>
+
+<script>
+    const cards = [
+        'images/card1.jpeg',
+        'images/card2.jpeg',
+        'images/card3.jpeg',
+        'images/card4.jpeg'
+    ];
+
+    let current = 0;
+    let scale = window.innerWidth < 768 ? 0.95 : 1;
+    let lastTap = 0;
+
+    const img = document.getElementById('cardImage');
+    const indicator = document.getElementById('pageIndicator');
+
+    function loadCard(i) {
+        img.src = cards[i];
+        indicator.innerText = `PAG ${i + 1}`;
+        scale = window.innerWidth < 768 ? 0.95 : 1;
+        img.style.transform = `scale(${scale})`;
+    }
+
+    function nextCard() {
+        current = (current + 1) % cards.length;
+        loadCard(current);
+    }
+
+    function previousCard() {
+        current = (current - 1 + cards.length) % cards.length;
+        loadCard(current);
+    }
+
+    img.addEventListener('touchend', () => {
+        const now = Date.now();
+        if (now - lastTap < 300) {
+            scale = scale > 1 ? 0.95 : 2;
+            img.style.transform = `scale(${scale})`;
         }
+        lastTap = now;
+    });
 
-        function nextCard() {
-            currentCard = (currentCard + 1) % cards.length;
-            loadCard(currentCard);
-        }
+    loadCard(current);
+</script>
 
-        function previousCard() {
-            currentCard = (currentCard - 1 + cards.length) % cards.length;
-            loadCard(currentCard);
-        }
-
-        function resetZoom() {
-            scale = 1;
-            posX = 0;
-            posY = 0;
-            updateTransform();
-        }
-
-        function updateTransform() {
-            cardImage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
-        }
-
-        // Touch events para zoom e pan
-        imageContainer.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                isDragging = true;
-                startX = e.touches[0].clientX - posX;
-                startY = e.touches[0].clientY - posY;
-            } else if (e.touches.length === 2) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                lastDistance = Math.sqrt(dx * dx + dy * dy);
-            }
-        });
-
-        imageContainer.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            
-            if (e.touches.length === 1 && isDragging && scale > 1) {
-                posX = e.touches[0].clientX - startX;
-                posY = e.touches[0].clientY - startY;
-                updateTransform();
-            } else if (e.touches.length === 2) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (lastDistance > 0) {
-                    const delta = distance - lastDistance;
-                    scale += delta * 0.01;
-                    scale = Math.max(1, Math.min(scale, 4));
-                    
-                    if (scale === 1) {
-                        posX = 0;
-                        posY = 0;
-                    }
-                    
-                    updateTransform();
-                }
-                
-                lastDistance = distance;
-            }
-        });
-
-        imageContainer.addEventListener('touchend', () => {
-            isDragging = false;
-            lastDistance = 0;
-        });
-
-        // Mouse events para desktop
-        imageContainer.addEventListener('mousedown', (e) => {
-            if (scale > 1) {
-                isDragging = true;
-                startX = e.clientX - posX;
-                startY = e.clientY - posY;
-            }
-        });
-
-        imageContainer.addEventListener('mousemove', (e) => {
-            if (isDragging && scale > 1) {
-                posX = e.clientX - startX;
-                posY = e.clientY - startY;
-                updateTransform();
-            }
-        });
-
-        imageContainer.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        imageContainer.addEventListener('mouseleave', () => {
-            isDragging = false;
-        });
-
-        // Scroll wheel para zoom (desktop)
-        imageContainer.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? -0.1 : 0.1;
-            scale += delta;
-            scale = Math.max(1, Math.min(scale, 4));
-            
-            if (scale === 1) {
-                posX = 0;
-                posY = 0;
-            }
-            
-            updateTransform();
-        });
-
-        // Navegação por teclado
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') {
-                previousCard();
-            } else if (e.key === 'ArrowRight') {
-                nextCard();
-            }
-        });
-
-        // Swipe gesture
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        document.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        });
-
-        document.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        });
-
-        function handleSwipe() {
-            if (scale === 1) { // Só fazer swipe se não estiver com zoom
-                if (touchEndX < touchStartX - 50) {
-                    nextCard();
-                }
-                if (touchEndX > touchStartX + 50) {
-                    previousCard();
-                }
-            }
-        }
-    </script>
 </body>
 </html>
