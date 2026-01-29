@@ -726,7 +726,7 @@
         // 🔐 CONFIGURAÇÃO DO SUPABASE
         // ==========================================
         // EDITE AQUI SUAS CREDENCIAIS DO SUPABASE:
-        const SUPABASE_URL = 'https://yyoyxanlolopwoczkhr.supabase.co';
+        const SUPABASE_URL = 'https://yyoyxanloloupwoczkhr.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM';
         
         // CONFIGURAÇÃO DE SENHA DO ADMIN:
@@ -737,9 +737,14 @@
         let supabaseClient = null;
         
         try {
+            console.log('🔄 Tentando conectar ao Supabase...');
+            console.log('URL:', SUPABASE_URL);
+            console.log('Key presente:', SUPABASE_KEY ? 'Sim' : 'Não');
+            
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('✅ Supabase Client criado:', supabaseClient);
         } catch (error) {
-            console.error('Erro ao conectar com Supabase:', error);
+            console.error('❌ Erro ao conectar com Supabase:', error);
         }
 
         let currentRaffle = null;
@@ -748,28 +753,58 @@
 
         // Inicializar
         async function init() {
+            // Verificar se Supabase está configurado
+            if (!supabaseClient) {
+                document.getElementById('loadingMessage').textContent = '❌ Erro: Supabase não configurado corretamente.';
+                return;
+            }
+
             await loadRaffle();
-            await loadSoldNumbers();
-            renderNumbers();
-            updateCheckout();
+            
+            if (currentRaffle) {
+                await loadSoldNumbers();
+                renderNumbers();
+                updateCheckout();
+            }
         }
 
         // Carregar dados da rifa
         async function loadRaffle() {
             try {
+                console.log('🔄 Carregando rifas...');
+                console.log('Supabase Client disponível:', !!supabaseClient);
+                
                 const { data, error } = await supabaseClient
                     .from('raffles')
                     .select('*')
                     .eq('active', true)
                     .single();
 
-                if (error) throw error;
+                console.log('📦 Resposta do Supabase:');
+                console.log('Data:', data);
+                console.log('Error:', error);
+
+                if (error) {
+                    console.error('❌ Erro Supabase:', error);
+                    throw error;
+                }
+
+                if (!data) {
+                    throw new Error('Nenhuma rifa ativa encontrada');
+                }
 
                 currentRaffle = data;
+                console.log('✅ Rifa carregada:', currentRaffle);
                 displayRaffle();
             } catch (error) {
-                console.error('Erro ao carregar rifa:', error);
-                document.getElementById('loadingMessage').textContent = 'Nenhuma rifa ativa no momento.';
+                console.error('❌ Erro ao carregar rifa:', error);
+                document.getElementById('loadingMessage').innerHTML = `
+                    <div style="color: #ff4444;">❌ Erro ao carregar rifa</div>
+                    <div style="font-size: 14px; margin-top: 10px; color: rgba(255,255,255,0.6);">
+                        Verifique o console do navegador (F12) para mais detalhes.<br>
+                        Erro: ${error.message || error.toString()}
+                    </div>
+                `;
             }
         }
 
@@ -794,6 +829,11 @@
 
         // Carregar números vendidos
         async function loadSoldNumbers() {
+            if (!currentRaffle || !currentRaffle.id) {
+                console.error('Rifa não carregada');
+                return;
+            }
+
             try {
                 const { data, error } = await supabaseClient
                     .from('raffle_sales')
@@ -804,9 +844,13 @@
                 if (error) throw error;
 
                 soldNumbers.clear();
-                data.forEach(sale => {
-                    sale.numbers.forEach(num => soldNumbers.add(num));
-                });
+                if (data && data.length > 0) {
+                    data.forEach(sale => {
+                        if (sale.numbers && Array.isArray(sale.numbers)) {
+                            sale.numbers.forEach(num => soldNumbers.add(num));
+                        }
+                    });
+                }
 
                 document.getElementById('soldCount').textContent = soldNumbers.size;
             } catch (error) {
@@ -861,6 +905,8 @@
 
         // Atualizar checkout
         function updateCheckout() {
+            if (!currentRaffle) return;
+
             const count = selectedNumbers.size;
             document.getElementById('selectedCount').textContent = count;
 
@@ -966,6 +1012,11 @@
         document.getElementById('adminPromoEnabled').addEventListener('change', togglePromoFields);
 
         async function saveRaffleConfig() {
+            if (!currentRaffle || !currentRaffle.id) {
+                alert('❌ Erro: Nenhuma rifa carregada para editar.');
+                return;
+            }
+
             try {
                 const updates = {
                     title: document.getElementById('adminTitle').value,
@@ -988,7 +1039,7 @@
                 location.reload();
             } catch (error) {
                 console.error('Erro ao salvar:', error);
-                alert('❌ Erro ao salvar configurações.');
+                alert('❌ Erro ao salvar configurações: ' + error.message);
             }
         }
 
