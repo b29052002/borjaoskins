@@ -210,12 +210,16 @@
         /* Links Section */
         .links {
             width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
+            align-items: center;
             gap: 20px;
         }
 
         .link-item {
+            width: 100%;
             position: relative;
             animation: fadeInUp 0.8s ease-out backwards;
         }
@@ -237,119 +241,61 @@
         }
 
         .link-btn {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 25px 30px;
-            background: rgba(10, 10, 10, 0.8);
-            border: 2px solid rgba(148, 49, 206, 0.3);
-            border-radius: 15px;
-            text-decoration: none;
-            color: white;
-            font-size: 20px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .link-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+            display: block;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(148, 49, 206, 0.3), transparent);
-            transition: left 0.6s;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: transform;
         }
 
-        .link-btn:hover::before {
-            left: 100%;
+        .link-item:nth-child(1) .link-btn {
+            animation: floatSubtle 4s ease-in-out infinite;
+            animation-delay: 0s;
         }
 
-        .link-btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: radial-gradient(circle, var(--purple-glow), transparent);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+        .link-item:nth-child(2) .link-btn {
+            animation: floatSubtle 4s ease-in-out infinite;
+            animation-delay: 0.5s;
         }
 
-        .link-btn:hover::after {
-            width: 500px;
-            height: 500px;
+        .link-item:nth-child(3) .link-btn {
+            animation: floatSubtle 4s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        .link-item:nth-child(4) .link-btn {
+            animation: floatSubtle 4s ease-in-out infinite;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes floatSubtle {
+            0%, 100% {
+                transform: translateY(0px) scale(1);
+            }
+            50% {
+                transform: translateY(-3px) scale(1.005);
+            }
+        }
+
+        .btn-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 20px;
+            filter: drop-shadow(0 10px 30px var(--purple-glow));
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .link-btn:hover {
             transform: translateY(-5px) scale(1.02);
-            border-color: var(--purple);
-            box-shadow: 
-                0 10px 40px var(--purple-glow),
-                inset 0 0 20px rgba(148, 49, 206, 0.1);
         }
 
-        .link-content {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            position: relative;
-            z-index: 1;
+        .link-btn:hover .btn-image {
+            filter: drop-shadow(0 15px 40px var(--purple-glow)) brightness(1.05);
         }
 
-        .link-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--purple), #6b1fa0);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 15px var(--purple-glow);
-            transition: transform 0.3s;
-        }
-
-        .link-btn:hover .link-icon {
-            transform: rotate(10deg) scale(1.1);
-        }
-
-        .link-text {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .link-title {
-            font-family: 'Kenyan Coffee', 'Orbitron', sans-serif;
-            font-size: 22px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .link-desc {
-            font-size: 14px;
-            font-weight: 300;
-            color: rgba(255, 255, 255, 0.6);
-            letter-spacing: 1px;
-        }
-
-        .link-arrow {
-            position: relative;
-            z-index: 1;
-            font-size: 28px;
-            transition: transform 0.3s;
-        }
-
-        .link-btn:hover .link-arrow {
-            transform: translateX(10px);
+        .link-btn:active {
+            transform: translateY(-3px) scale(1.01);
         }
 
         /* Specific link colors */
@@ -478,60 +424,32 @@
 
         <div class="links">
             <div class="link-item">
-                <a href="vender-skins.html" class="link-btn link-whatsapp">
-                    <div class="link-content">
-                        <div class="link-icon">💎</div>
-                        <div class="link-text">
-                            <span class="link-title">Vender/Upgrade</span>
-                            <span class="link-desc">Venda ou troque suas skins</span>
-                        </div>
-                    </div>
-                    <span class="link-arrow">→</span>
+                <a href="vender-skins.html" class="link-btn">
+                    <img src="images/botao1.png" alt="Vender/Upgrade" class="btn-image">
                 </a>
             </div>
 
             <div class="link-item">
-                <a href="embreve.html" class="link-btn link-rifas">
-                    <div class="link-content">
-                        <div class="link-icon">🎰</div>
-                        <div class="link-text">
-                            <span class="link-title">Rifa de Skins</span>
-                            <span class="link-desc">Ganhe skins raras</span>
-                        </div>
-                    </div>
-                    <span class="link-arrow">→</span>
+                <a href="em-breve.html" class="link-btn">
+                    <img src="images/botao2.png" alt="Rifa de Skins" class="btn-image">
                 </a>
             </div>
 
             <div class="link-item">
-                <a href="estoque.html" class="link-btn link-inventario">
-                    <div class="link-content">
-                        <div class="link-icon">🔫</div>
-                        <div class="link-text">
-                            <span class="link-title">Skins em Estoque</span>
-                            <span class="link-desc">Confira as skins disponíveis</span>
-                        </div>
-                    </div>
-                    <span class="link-arrow">→</span>
+                <a href="estoque.html" class="link-btn">
+                    <img src="images/botao3.png" alt="Skins em Estoque" class="btn-image">
                 </a>
             </div>
 
             <div class="link-item">
-                <a href="https://instagram.com/borjaoskins" class="link-btn link-instagram" target="_blank">
-                    <div class="link-content">
-                        <div class="link-icon">📸</div>
-                        <div class="link-text">
-                            <span class="link-title">Instagram</span>
-                            <span class="link-desc">Acompanhe novidades</span>
-                        </div>
-                    </div>
-                    <span class="link-arrow">→</span>
+                <a href="https://instagram.com/seu-usuario" class="link-btn" target="_blank">
+                    <img src="images/botao4.png" alt="Instagram" class="btn-image">
                 </a>
             </div>
         </div>
 
         <div class="footer">
-            Desenvolvido por hive.mkt
+            Desenvolvido por hive.mkt com 💖
         </div>
     </div>
 
