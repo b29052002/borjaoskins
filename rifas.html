@@ -1453,9 +1453,10 @@
 
                 alert('✅ Pagamento aprovado com sucesso!\n\nOs números foram liberados para o cliente.');
                 
-                // Recarregar lista de vendas
-                await loadSales();
-                updateAdminStats();
+                // Recarregar dados
+                await loadSoldNumbers(); // Atualiza números vendidos
+                await loadSales(); // Atualiza lista de vendas
+                updateAdminStats(); // Atualiza estatísticas
 
             } catch (error) {
                 console.error('Erro ao aprovar venda:', error);
@@ -1480,9 +1481,10 @@
 
                 alert('✅ Venda pendente removida com sucesso!\n\nOs números foram liberados.');
                 
-                // Recarregar lista de vendas
-                await loadSales();
-                updateAdminStats();
+                // Recarregar dados
+                await loadSoldNumbers(); // Atualiza números vendidos
+                await loadSales(); // Atualiza lista de vendas
+                updateAdminStats(); // Atualiza estatísticas
 
             } catch (error) {
                 console.error('Erro ao remover venda:', error);
