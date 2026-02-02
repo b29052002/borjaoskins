@@ -910,8 +910,8 @@
         const SUPABASE_URL = 'https://yyoyxanloloupwoczkhr.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM';
         
-        // MERCADO PAGO - Credenciais de Teste
-        const MERCADOPAGO_PUBLIC_KEY = 'TEST-ec3cc9a9-8277-4b2c-a55a-2a73c4075e41';
+        // MERCADO PAGO - Credenciais de PRODUÇÃO
+        const MERCADOPAGO_PUBLIC_KEY = 'APP_USR-4ed66640-511e-4aea-846b-70499be11156';
         const CLIENT_EMAIL = 'douglasorb@gmail.com';
         
         // CONFIGURAÇÃO DE SENHA DO ADMIN:
@@ -1172,44 +1172,7 @@
                     external_reference: saleData.id
                 };
 
-                // ⚠️ SOLUÇÃO TEMPORÁRIA - Até as Netlify Functions funcionarem
-                // Comentar este bloco quando as functions estiverem OK
-                
-                console.log('⚠️ MODO SIMULAÇÃO - Functions não disponíveis');
-                
-                // Simular resposta do Mercado Pago
-                const mockPixData = {
-                    id: 'MOCK-' + Date.now(),
-                    status: 'pending',
-                    point_of_interaction: {
-                        transaction_data: {
-                            qr_code_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-                            qr_code: '00020126580014br.gov.bcb.pix0136' + saleData.id + '520400005303986540' + amount.toFixed(2) + '5802BR5913BORJAO SKINS6009SAO PAULO'
-                        }
-                    }
-                };
-                
-                // Atualizar venda com payment_id
-                await supabaseClient
-                    .from('raffle_sales')
-                    .update({ payment_id: mockPixData.id })
-                    .eq('id', saleData.id);
-                
-                // Mostrar QR Code simulado
-                displayPixQRCode(mockPixData.point_of_interaction.transaction_data.qr_code_base64, mockPixData.point_of_interaction.transaction_data.qr_code, mockPixData.id, saleData.id);
-                
-                // Mostrar aviso
-                alert('⚠️ MODO TESTE - SIMULAÇÃO\n\nAs Netlify Functions ainda não estão ativas.\n\nPara aprovar: Vá no painel admin e aprove manualmente.');
-                
-                // Não iniciar verificação automática em modo simulação
-                // startPaymentCheck(mockPixData.id, saleData.id);
-                
-                return; // Parar aqui em modo simulação
-                
-                // ⚠️ FIM DA SOLUÇÃO TEMPORÁRIA
-                
-                // Chamar Netlify Function para criar pagamento PIX (DESCOMENTAR quando funcionar)
-                /*
+                // Chamar Netlify Function para criar pagamento PIX REAL
                 const response = await fetch('/.netlify/functions/create-pix', {
                     method: 'POST',
                     headers: {
@@ -1238,7 +1201,6 @@
                 } else {
                     throw new Error('Erro ao gerar PIX');
                 }
-                */
 
             } catch (error) {
                 console.error('Erro ao gerar PIX:', error);
