@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
     <style>
         @font-face {
             font-family: 'Kenyan Coffee';
@@ -337,6 +338,81 @@
             cursor: not-allowed;
         }
 
+        /* Modal PIX Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(10, 10, 10, 0.95);
+            border: 2px solid var(--purple);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 32px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-family: 'Kenyan Coffee', sans-serif;
+            font-size: 28px;
+            color: var(--purple);
+            margin-bottom: 20px;
+        }
+
+        #qrCodeContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        #qrCodeContainer img,
+        #qrCodeContainer canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
         /* Admin Panel */
         .admin-trigger {
             position: fixed;
@@ -562,7 +638,7 @@
 
     <div class="container">
         <div class="header">
-            <a href="index.html" style="display: block; width: fit-content; margin: 0 auto;">
+            <a href="linktree-cs.html" style="display: block; width: fit-content; margin: 0 auto;">
                 <div class="logo">
                     <img src="images/logodb.png" alt="Logo Borjão Skins">
                 </div>
@@ -639,6 +715,45 @@
 
     <!-- Admin Trigger -->
     <div class="admin-trigger" onclick="openAdminPanel()">⚙️</div>
+
+    <!-- Modal de Pagamento PIX -->
+    <div class="modal" id="pixModal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <button class="modal-close" onclick="closePixModal()">×</button>
+            <h2 class="modal-title">💳 Pagamento PIX</h2>
+            
+            <div id="pixLoading" style="padding: 40px;">
+                <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+                <p>Gerando QR Code PIX...</p>
+            </div>
+
+            <div id="pixContent" style="display: none;">
+                <div style="background: white; padding: 20px; border-radius: 15px; margin: 20px 0;">
+                    <div id="qrCodeContainer"></div>
+                </div>
+                
+                <div style="background: rgba(148, 49, 206, 0.1); padding: 20px; border-radius: 15px; margin: 20px 0;">
+                    <p style="margin-bottom: 10px; font-size: 14px; color: rgba(255,255,255,0.7);">
+                        Ou copie o código PIX:
+                    </p>
+                    <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; word-break: break-all; font-size: 12px; margin-bottom: 10px;" id="pixCode"></div>
+                    <button onclick="copyPixCode()" style="background: #00ff88; color: black; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700;">
+                        📋 Copiar Código
+                    </button>
+                </div>
+
+                <div style="background: rgba(0, 255, 136, 0.1); border: 2px solid #00ff88; border-radius: 15px; padding: 20px; margin-top: 20px;">
+                    <p style="color: #00ff88; font-weight: 700; margin-bottom: 10px;">
+                        ⏱️ Aguardando pagamento...
+                    </p>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.7);">
+                        Seus números estão reservados por 15 minutos.<br>
+                        Assim que o pagamento for confirmado, você receberá seus números!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Admin Panel -->
     <div class="admin-panel" id="adminPanel">
@@ -732,14 +847,17 @@
 
     <script>
         // ==========================================
-        // 🔐 CONFIGURAÇÃO DO SUPABASE
+        // 🔐 CONFIGURAÇÃO DO SUPABASE E MERCADO PAGO
         // ==========================================
-        // EDITE AQUI SUAS CREDENCIAIS DO SUPABASE:
         const SUPABASE_URL = 'https://yyoyxanloloupwoczkhr.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM';
         
+        // MERCADO PAGO - Credenciais de Teste
+        const MERCADOPAGO_PUBLIC_KEY = 'TEST-ec3cc9a9-8277-4b2c-a55a-2a73c4075e41';
+        const CLIENT_EMAIL = 'douglasorb@gmail.com';
+        
         // CONFIGURAÇÃO DE SENHA DO ADMIN:
-        const ADMIN_PASSWORD = 'admin123'; // ← Trocar aqui a senha
+        const ADMIN_PASSWORD = 'borjao777';
         // ==========================================
 
         // Inicializar Supabase
@@ -935,43 +1053,191 @@
             if (selectedNumbers.size === 0) return;
 
             const name = prompt('Digite seu nome completo:');
-            if (!name) return;
+            if (!name || name.trim() === '') return;
 
             const phone = prompt('Digite seu WhatsApp (com DDD):');
-            if (!phone) return;
+            if (!phone || phone.trim() === '') return;
 
             try {
-                // Salvar venda como pendente
-                const { data, error } = await supabaseClient
+                const totalAmount = parseFloat(document.getElementById('totalPrice').textContent.replace('R$ ', '').replace('.', '').replace(',', '.'));
+                const numbersArray = Array.from(selectedNumbers);
+
+                // Salvar venda como pendente (reservado)
+                const { data: saleData, error: saleError } = await supabaseClient
                     .from('raffle_sales')
                     .insert({
                         raffle_id: currentRaffle.id,
-                        buyer_name: name,
-                        buyer_phone: phone,
-                        numbers: Array.from(selectedNumbers),
-                        total_amount: parseFloat(document.getElementById('totalPrice').textContent.replace('R$ ', '').replace(',', '.')),
-                        payment_status: 'pending'
+                        buyer_name: name.trim(),
+                        buyer_phone: phone.trim(),
+                        numbers: numbersArray,
+                        total_amount: totalAmount,
+                        payment_status: 'reserved',
+                        created_at: new Date().toISOString()
                     })
                     .select()
                     .single();
 
-                if (error) throw error;
+                if (saleError) throw saleError;
 
-                alert('✅ Números reservados! Redirecionando para pagamento PIX...');
-                
-                // Aqui você integraria com Mercado Pago
-                // Por enquanto, vamos simular
-                simulatePayment(data.id);
+                // Gerar pagamento PIX com Mercado Pago
+                await generatePixPayment(saleData, totalAmount, numbersArray);
 
             } catch (error) {
                 console.error('Erro ao processar compra:', error);
-                alert('❌ Erro ao processar compra. Tente novamente.');
+                alert('❌ Erro ao processar compra: ' + (error.message || 'Tente novamente.'));
             }
         }
 
-        // Simular pagamento (substituir por integração real do Mercado Pago)
+        // Gerar pagamento PIX com Mercado Pago
+        async function generatePixPayment(saleData, amount, numbers) {
+            try {
+                // Mostrar modal de loading
+                document.getElementById('pixModal').style.display = 'flex';
+                document.getElementById('pixModal').classList.add('active');
+                document.getElementById('pixLoading').style.display = 'block';
+                document.getElementById('pixContent').style.display = 'none';
+
+                // Aqui você precisa fazer uma chamada para seu backend
+                // que vai usar a SDK do Mercado Pago server-side
+                // Por enquanto, vou mostrar como seria a estrutura:
+
+                const paymentData = {
+                    transaction_amount: amount,
+                    description: `Rifa ${currentRaffle.title} - Números: ${numbers.join(', ')}`,
+                    payment_method_id: 'pix',
+                    payer: {
+                        email: CLIENT_EMAIL,
+                        first_name: saleData.buyer_name.split(' ')[0],
+                        last_name: saleData.buyer_name.split(' ').slice(1).join(' ') || saleData.buyer_name
+                    },
+                    notification_url: window.location.origin + '/.netlify/functions/webhook',
+                    external_reference: saleData.id
+                };
+
+                // Chamar Netlify Function para criar pagamento PIX
+                const response = await fetch('/.netlify/functions/create-pix', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const pixData = await response.json();
+
+                if (pixData.point_of_interaction && pixData.point_of_interaction.transaction_data) {
+                    const qrCode = pixData.point_of_interaction.transaction_data.qr_code_base64;
+                    const pixCodeString = pixData.point_of_interaction.transaction_data.qr_code;
+
+                    // Atualizar venda com payment_id
+                    await supabaseClient
+                        .from('raffle_sales')
+                        .update({ payment_id: pixData.id })
+                        .eq('id', saleData.id);
+
+                    // Mostrar QR Code
+                    displayPixQRCode(qrCode, pixCodeString, pixData.id, saleData.id);
+
+                    // Iniciar verificação de pagamento
+                    startPaymentCheck(pixData.id, saleData.id);
+                } else {
+                    throw new Error('Erro ao gerar PIX');
+                }
+
+            } catch (error) {
+                console.error('Erro ao gerar PIX:', error);
+                document.getElementById('pixModal').classList.remove('active');
+                alert('❌ Erro ao gerar pagamento PIX. Por favor, tente novamente.');
+            }
+        }
+
+        // Exibir QR Code PIX
+        function displayPixQRCode(qrCodeBase64, pixCodeString, paymentId, saleId) {
+            document.getElementById('pixLoading').style.display = 'none';
+            document.getElementById('pixContent').style.display = 'block';
+
+            // Exibir QR Code
+            const qrContainer = document.getElementById('qrCodeContainer');
+            qrContainer.innerHTML = `<img src="data:image/png;base64,${qrCodeBase64}" alt="QR Code PIX" style="max-width: 300px;">`;
+
+            // Exibir código PIX
+            document.getElementById('pixCode').textContent = pixCodeString;
+
+            // Salvar para função de copiar
+            window.currentPixCode = pixCodeString;
+        }
+
+        // Copiar código PIX
+        function copyPixCode() {
+            if (window.currentPixCode) {
+                navigator.clipboard.writeText(window.currentPixCode).then(() => {
+                    alert('✅ Código PIX copiado!');
+                }).catch(() => {
+                    // Fallback para navegadores antigos
+                    const textarea = document.createElement('textarea');
+                    textarea.value = window.currentPixCode;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert('✅ Código PIX copiado!');
+                });
+            }
+        }
+
+        // Fechar modal PIX
+        function closePixModal() {
+            document.getElementById('pixModal').classList.remove('active');
+            document.getElementById('pixModal').style.display = 'none';
+            if (window.paymentCheckInterval) {
+                clearInterval(window.paymentCheckInterval);
+            }
+            // Recarregar para atualizar números
+            location.reload();
+        }
+
+        // Verificar status do pagamento
+        async function startPaymentCheck(paymentId, saleId) {
+            let attempts = 0;
+            const maxAttempts = 60; // 15 minutos (60 * 15s)
+
+            window.paymentCheckInterval = setInterval(async () => {
+                attempts++;
+
+                if (attempts >= maxAttempts) {
+                    clearInterval(window.paymentCheckInterval);
+                    alert('⏱️ Tempo expirado. Se você já pagou, seus números serão liberados automaticamente.');
+                    closePixModal();
+                    return;
+                }
+
+                try {
+                    // Verificar status no Supabase
+                    const { data, error } = await supabaseClient
+                        .from('raffle_sales')
+                        .select('payment_status')
+                        .eq('id', saleId)
+                        .single();
+
+                    if (data && data.payment_status === 'approved') {
+                        clearInterval(window.paymentCheckInterval);
+                        
+                        // Mostrar sucesso
+                        alert('🎉 Pagamento confirmado! Seus números foram reservados com sucesso!');
+                        closePixModal();
+                        
+                        // Recarregar página para mostrar números vendidos
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar pagamento:', error);
+                }
+            }, 15000); // Verificar a cada 15 segundos
+        }
+
+        // Simular pagamento (REMOVER EM PRODUÇÃO - apenas para testes)
         function simulatePayment(saleId) {
-            alert('🔄 Em produção, aqui geraria o QR Code PIX do Mercado Pago.\n\nPor enquanto, a venda ficará como pendente no painel admin.');
+            alert('🔄 Sistema de pagamento em desenvolvimento.\n\nEm produção, aqui geraria o QR Code PIX do Mercado Pago.');
             selectedNumbers.clear();
             updateNumbersDisplay();
             updateCheckout();
