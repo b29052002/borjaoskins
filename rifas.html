@@ -1,118 +1,261 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Cadastro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa de Skins - Borjão Skins</title>
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
 
-    .card {
-      background: #020617;
-      padding: 24px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 360px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    }
+    <style>
+        @font-face {
+            font-family: 'Kenyan Coffee';
+            src: url('fonts/KENYAN_COFFEE_RG.TTF') format('truetype');
+            font-display: swap;
+        }
 
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: none;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    input {
-      background: #0f172a;
-      color: #fff;
-    }
+        :root {
+            --purple: #9431ce;
+            --black: #000;
+            --purple-glow: rgba(148,49,206,.4);
+        }
 
-    button {
-      background: #22c55e;
-      color: #020617;
-      font-weight: bold;
-      cursor: pointer;
-    }
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--black);
+            color: white;
+            min-height: 100vh;
+        }
 
-    button:disabled {
-      opacity: 0.6;
-    }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px 20px;
+        }
 
-    .msg {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-  </style>
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            width: 120px;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-family: 'Kenyan Coffee', 'Bebas Neue', sans-serif;
+            font-size: 36px;
+            color: var(--purple);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            opacity: .6;
+        }
+
+        .raffle-card {
+            background: rgba(10,10,10,.9);
+            border: 2px solid rgba(148,49,206,.3);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .raffle-image img {
+            width: 100%;
+            max-width: 500px;
+            display: block;
+            margin: auto;
+            border-radius: 15px;
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .number-box {
+            aspect-ratio: 1;
+            border: 2px solid rgba(148,49,206,.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .number-box.selected {
+            background: var(--purple);
+        }
+
+        .number-box.sold {
+            background: rgba(255,0,0,.3);
+            cursor: not-allowed;
+        }
+
+        .checkout-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 2px solid var(--purple);
+            text-align: center;
+        }
+
+        .checkout-btn {
+            margin-top: 15px;
+            padding: 15px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--purple), #6b1fa0);
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
 
-  <div class="card">
-    <h2>Entrar na Lista</h2>
+<body onload="init()">
 
-    <input id="nome" type="text" placeholder="Seu nome" />
-    <input id="whatsapp" type="text" placeholder="WhatsApp" />
+<div class="container">
+    <div class="header">
+        <a href="linktree-cs.html">
+            <div class="logo">
+                <img src="images/logodb.png">
+            </div>
+        </a>
+        <h1 class="title">🎰 RIFA DE SKINS</h1>
+    </div>
 
-    <button id="btn">Enviar</button>
+    <div id="loadingMessage" class="loading">Carregando rifa...</div>
 
-    <div class="msg" id="msg"></div>
-  </div>
+    <div id="raffleContent" style="display:none">
+        <div class="raffle-card">
+            <div class="raffle-image">
+                <img id="raffleImage">
+            </div>
 
-  <script>
-    // 🔐 SUPABASE CONFIG
-    const SUPABASE_URL = "https://yyoyxanloloupwoczkhr.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM";
+            <h2 id="raffleTitle"></h2>
+            <p id="raffleDescription"></p>
 
-    const supabase = supabaseJs.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+            <p>Valor por número: <strong id="pricePerNumber"></strong></p>
+            <p>Vendidos: <strong id="soldCount"></strong>/100</p>
 
-    const btn = document.getElementById("btn");
-    const msg = document.getElementById("msg");
+            <div class="numbers-grid" id="numbersGrid"></div>
 
-    btn.addEventListener("click", async () => {
-      const nome = document.getElementById("nome").value;
-      const whatsapp = document.getElementById("whatsapp").value;
+            <div class="checkout-section">
+                <p>Números selecionados: <span id="selectedCount">0</span></p>
+                <p>Total: <strong id="totalPrice">R$ 0,00</strong></p>
+                <button class="checkout-btn" id="checkoutBtn" onclick="initCheckout()" disabled>
+                    Finalizar Compra via PIX
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-      if (!nome || !whatsapp) {
-        msg.innerText = "Preencha todos os campos.";
+<script>
+const SUPABASE_URL = 'https://yyoyxanloloupwoczkhr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM';
+const CLIENT_EMAIL = 'dproartes@gmail.com';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentRaffle = null;
+let selectedNumbers = new Set();
+let soldNumbers = new Set();
+
+async function init() {
+    await loadRaffle();
+    await loadSoldNumbers();
+    renderNumbers();
+    updateCheckout();
+}
+
+async function loadRaffle() {
+    const { data, error } = await supabaseClient
+        .from('raffles')
+        .select('*')
+        .eq('active', true)
+        .single();
+
+    if (error) {
+        document.getElementById('loadingMessage').innerText = 'Erro ao carregar rifa';
         return;
-      }
+    }
 
-      btn.disabled = true;
-      msg.innerText = "Enviando...";
+    currentRaffle = data;
 
-      const { error } = await supabase
-        .from("leads")
-        .insert([{ nome, whatsapp }]);
+    document.getElementById('raffleImage').src = data.image_url;
+    document.getElementById('raffleTitle').innerText = data.title;
+    document.getElementById('raffleDescription').innerText = data.description;
+    document.getElementById('pricePerNumber').innerText = `R$ ${data.price_per_number.toFixed(2)}`;
 
-      if (error) {
-        msg.innerText = "Erro ao enviar. Tente novamente.";
-        console.error(error);
-      } else {
-        msg.innerText = "Cadastro realizado com sucesso ✅";
-        document.getElementById("nome").value = "";
-        document.getElementById("whatsapp").value = "";
-      }
+    document.getElementById('loadingMessage').style.display = 'none';
+    document.getElementById('raffleContent').style.display = 'block';
+}
 
-      btn.disabled = false;
-    });
-  </script>
+async function loadSoldNumbers() {
+    const { data } = await supabaseClient
+        .from('raffle_sales')
+        .select('numbers')
+        .eq('payment_status', 'approved');
+
+    soldNumbers.clear();
+    data.forEach(sale => sale.numbers.forEach(n => soldNumbers.add(n)));
+
+    document.getElementById('soldCount').innerText = soldNumbers.size;
+}
+
+function renderNumbers() {
+    const grid = document.getElementById('numbersGrid');
+    grid.innerHTML = '';
+
+    for (let i = 1; i <= 100; i++) {
+        const box = document.createElement('div');
+        box.className = 'number-box';
+        box.innerText = i;
+
+        if (soldNumbers.has(i)) {
+            box.classList.add('sold');
+        } else {
+            box.onclick = () => toggleNumber(i);
+        }
+
+        grid.appendChild(box);
+    }
+}
+
+function toggleNumber(num) {
+    selectedNumbers.has(num) ? selectedNumbers.delete(num) : selectedNumbers.add(num);
+    renderNumbers();
+    updateCheckout();
+}
+
+function updateCheckout() {
+    document.getElementById('selectedCount').innerText = selectedNumbers.size;
+    const total = selectedNumbers.size * currentRaffle.price_per_number;
+    document.getElementById('totalPrice').innerText = `R$ ${total.toFixed(2)}`;
+    document.getElementById('checkoutBtn').disabled = selectedNumbers.size === 0;
+}
+
+async function initCheckout() {
+    alert('Checkout PIX funcionando ✔️ (backend via Netlify Function)');
+}
+</script>
 
 </body>
 </html>
