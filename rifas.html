@@ -612,6 +612,31 @@
             font-size: 12px;
         }
 
+        .btn-remove-pending {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background: #ff4444;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-remove-pending:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+        }
+
+        .btn-remove-pending:active {
+            transform: translateY(0);
+        }
+
         @media (max-width: 768px) {
             .title {
                 font-size: 28px;
@@ -1346,6 +1371,11 @@
                         <div class="numbers-sold">
                             ${sale.numbers.map(n => `<span class="number-badge">${n}</span>`).join('')}
                         </div>
+                        ${sale.payment_status !== 'approved' ? `
+                            <button class="btn-remove-pending" onclick="removePendingSale('${sale.id}')">
+                                🗑️ Remover Pendente
+                            </button>
+                        ` : ''}
                     </div>
                 `).join('');
             } catch (error) {
@@ -1366,6 +1396,33 @@
             document.getElementById('adminTotalSold').textContent = `R$ ${totalSold.toFixed(2)}`;
             document.getElementById('adminNumbersSold').textContent = `${soldNumbers.size}/100`;
             document.getElementById('adminBuyersCount').textContent = approvedSales.length;
+        }
+
+        // Remover venda pendente
+        async function removePendingSale(saleId) {
+            if (!confirm('⚠️ Tem certeza que deseja remover esta venda pendente?\n\nOs números serão liberados novamente.')) {
+                return;
+            }
+
+            try {
+                // Deletar venda do Supabase
+                const { error } = await supabaseClient
+                    .from('raffle_sales')
+                    .delete()
+                    .eq('id', saleId);
+
+                if (error) throw error;
+
+                alert('✅ Venda pendente removida com sucesso!\n\nOs números foram liberados.');
+                
+                // Recarregar lista de vendas
+                await loadAdminSales();
+                updateAdminStats();
+
+            } catch (error) {
+                console.error('Erro ao remover venda:', error);
+                alert('❌ Erro ao remover venda: ' + (error.message || 'Tente novamente.'));
+            }
         }
 
         async function drawWinner() {
