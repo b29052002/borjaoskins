@@ -912,7 +912,7 @@
         
         // MERCADO PAGO - Credenciais de PRODUÇÃO
         const MERCADOPAGO_PUBLIC_KEY = 'APP_USR-4ed66640-511e-4aea-846b-70499be11156';
-        const CLIENT_EMAIL = 'douglasorb@gmail.com';
+        const CLIENT_EMAIL = 'dproartes@gmail.com';
         
         // CONFIGURAÇÃO DE SENHA DO ADMIN:
         const ADMIN_PASSWORD = 'borjao777';
@@ -1437,57 +1437,120 @@
         }
 
         // Aprovar venda manualmente (modo simulação)
+        // Testar conexão com Supabase
+        async function testSupabaseConnection() {
+            console.log('🧪 Testando conexão Supabase...');
+            
+            try {
+                // Testar SELECT
+                console.log('1️⃣ Testando SELECT...');
+                const { data: selectData, error: selectError } = await supabaseClient
+                    .from('raffle_sales')
+                    .select('*')
+                    .limit(1);
+                
+                console.log('SELECT resultado:', { selectData, selectError });
+                
+                // Testar UPDATE (em uma venda fake)
+                console.log('2️⃣ Testando UPDATE...');
+                const { data: updateData, error: updateError } = await supabaseClient
+                    .from('raffle_sales')
+                    .update({ payment_status: 'approved' })
+                    .eq('id', '00000000-0000-0000-0000-000000000000')
+                    .select();
+                
+                console.log('UPDATE resultado:', { updateData, updateError });
+                
+                // Testar DELETE (em uma venda fake)
+                console.log('3️⃣ Testando DELETE...');
+                const { data: deleteData, error: deleteError } = await supabaseClient
+                    .from('raffle_sales')
+                    .delete()
+                    .eq('id', '00000000-0000-0000-0000-000000000000');
+                
+                console.log('DELETE resultado:', { deleteData, deleteError });
+                
+                alert('🧪 Testes concluídos! Veja o console (F12).');
+                
+            } catch (error) {
+                console.error('❌ Erro nos testes:', error);
+                alert('❌ Erro: ' + error.message);
+            }
+        }
+
         async function approveSaleManually(saleId) {
+            console.log('✅ Tentando aprovar venda:', saleId);
+            
             if (!confirm('✅ Aprovar este pagamento manualmente?\n\nOs números serão liberados para o cliente.')) {
                 return;
             }
 
             try {
+                console.log('📤 Atualizando no Supabase...');
+                
                 // Atualizar status para approved
-                const { error } = await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('raffle_sales')
                     .update({ payment_status: 'approved' })
-                    .eq('id', saleId);
+                    .eq('id', saleId)
+                    .select();
 
-                if (error) throw error;
+                console.log('📥 Resposta do Supabase:', { data, error });
 
+                if (error) {
+                    console.error('❌ Erro do Supabase:', error);
+                    throw error;
+                }
+
+                console.log('✅ Aprovado com sucesso!');
                 alert('✅ Pagamento aprovado com sucesso!\n\nOs números foram liberados para o cliente.');
                 
                 // Recarregar dados
+                console.log('🔄 Recarregando dados...');
                 await loadSoldNumbers(); // Atualiza números vendidos
                 await loadSales(); // Atualiza lista de vendas
                 updateAdminStats(); // Atualiza estatísticas
+                console.log('✅ Dados recarregados!');
 
             } catch (error) {
-                console.error('Erro ao aprovar venda:', error);
+                console.error('❌ Erro ao aprovar venda:', error);
                 alert('❌ Erro ao aprovar: ' + (error.message || 'Tente novamente.'));
             }
         }
 
         // Remover venda pendente
         async function removePendingSale(saleId) {
+            console.log('🗑️ Tentando remover venda:', saleId);
+            
             if (!confirm('⚠️ Tem certeza que deseja remover esta venda pendente?\n\nOs números serão liberados novamente.')) {
                 return;
             }
 
             try {
                 // Deletar venda do Supabase
+                console.log('📤 Deletando do Supabase...');
                 const { error } = await supabaseClient
                     .from('raffle_sales')
                     .delete()
                     .eq('id', saleId);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('❌ Erro do Supabase:', error);
+                    throw error;
+                }
 
+                console.log('✅ Deletado com sucesso!');
                 alert('✅ Venda pendente removida com sucesso!\n\nOs números foram liberados.');
                 
                 // Recarregar dados
+                console.log('🔄 Recarregando dados...');
                 await loadSoldNumbers(); // Atualiza números vendidos
                 await loadSales(); // Atualiza lista de vendas
                 updateAdminStats(); // Atualiza estatísticas
+                console.log('✅ Dados recarregados!');
 
             } catch (error) {
-                console.error('Erro ao remover venda:', error);
+                console.error('❌ Erro ao remover venda:', error);
                 alert('❌ Erro ao remover venda: ' + (error.message || 'Tente novamente.'));
             }
         }
