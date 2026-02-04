@@ -1005,25 +1005,27 @@
                     .from('raffles')
                     .select('*')
                     .eq('active', true)
-                    .single();
+                    .maybeSingle(); // ✅ CORREÇÃO: maybeSingle não dá erro se não encontrar
 
                 console.log('📦 Resposta do Supabase:');
                 console.log('Data:', data);
                 console.log('Error:', error);
 
+                // Se houve erro de verdade (não de "não encontrado")
                 if (error) {
                     console.error('❌ Erro Supabase:', error);
                     throw error;
                 }
 
+                // Se não encontrou nenhuma rifa ativa
                 if (!data) {
                     document.getElementById('loadingMessage').innerHTML = `
-                        <div style="text-align: center; padding: 60px 20px;">
-                            <div style="font-size: 64px; margin-bottom: 20px;">🎰</div>
-                            <h2 style="font-size: 28px; color: var(--purple); margin-bottom: 15px;">
-                                Sem Rifas Ativas
+                        <div style="text-align: center; padding: 80px 20px;">
+                            <div style="font-size: 80px; margin-bottom: 30px;">🎰</div>
+                            <h2 style="font-family: 'Kenyan Coffee', 'Orbitron', sans-serif; font-size: 42px; color: var(--purple); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;">
+                                No Momento<br>Sem Rifas
                             </h2>
-                            <p style="color: rgba(255,255,255,0.6); font-size: 16px;">
+                            <p style="color: rgba(255,255,255,0.7); font-size: 18px; max-width: 500px; margin: 0 auto;">
                                 Não há nenhuma rifa ativa no momento.<br>
                                 Aguarde novas rifas em breve!
                             </p>
@@ -1037,11 +1039,17 @@
                 displayRaffle();
             } catch (error) {
                 console.error('❌ Erro ao carregar rifa:', error);
+                
+                // Mensagem de erro genérica
                 document.getElementById('loadingMessage').innerHTML = `
-                    <div style="color: #ff4444;">❌ Erro ao carregar rifa</div>
-                    <div style="font-size: 14px; margin-top: 10px; color: rgba(255,255,255,0.6);">
-                        Verifique o console do navegador (F12) para mais detalhes.<br>
-                        Erro: ${error.message || error.toString()}
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px; color: #ff4444;">⚠️</div>
+                        <h2 style="font-size: 24px; color: #ff4444; margin-bottom: 15px;">
+                            Erro ao Carregar Rifa
+                        </h2>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 14px;">
+                            ${error.message || 'Erro desconhecido'}
+                        </p>
                     </div>
                 `;
             }
