@@ -1,7 +1,6 @@
 // Netlify Function — Create PIX Payment
 // Mercado Pago SDK v2
 // Produção | Seguro | Validado
-
 const { MercadoPagoConfig, Payment } = require('mercadopago');
 
 exports.handler = async (event) => {
@@ -38,7 +37,6 @@ exports.handler = async (event) => {
     // Parse body
     // ===============================
     const body = JSON.parse(event.body);
-
     const {
       transaction_amount,
       description,
@@ -52,7 +50,6 @@ exports.handler = async (event) => {
     // Validações fortes
     // ===============================
     const amount = Number(transaction_amount);
-
     if (!amount || isNaN(amount)) {
       throw new Error('Invalid transaction_amount');
     }
@@ -107,6 +104,15 @@ exports.handler = async (event) => {
     });
 
     // ===============================
+    // 🔧 CORREÇÃO: Fallback para ambos os caminhos do QR Code
+    // ===============================
+    const qrCode = result.point_of_interaction?.transaction_data?.qr_code || result.qr_code;
+    const qrCodeBase64 = result.point_of_interaction?.transaction_data?.qr_code_base64 || result.qr_code_base64;
+
+    console.log('🔍 QR Code presente:', !!qrCode);
+    console.log('🔍 QR Code Base64 presente:', !!qrCodeBase64);
+
+    // ===============================
     // Retorno limpo pro front
     // ===============================
     return {
@@ -116,14 +122,14 @@ exports.handler = async (event) => {
         id: result.id,
         status: result.status,
         transaction_amount: result.transaction_amount,
-        qr_code: result.point_of_interaction?.transaction_data?.qr_code,
-        qr_code_base64: result.point_of_interaction?.transaction_data?.qr_code_base64
+        qr_code: qrCode,
+        qr_code_base64: qrCodeBase64
       })
     };
 
   } catch (error) {
     console.error('❌ ERRO CREATE PIX:', error);
-
+    
     return {
       statusCode: 500,
       headers,
