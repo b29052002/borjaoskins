@@ -810,6 +810,16 @@
                     </p>
                 </div>
             </div>
+
+            <!-- Mini popup de obrigado -->
+            <div id="thankYouMini" style="display: none; text-align: center; padding: 40px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+                <h3 style="color: #00ff88; font-size: 24px; margin-bottom: 10px;">Pagamento Confirmado!</h3>
+                <p style="font-size: 16px; color: rgba(255,255,255,0.8);">
+                    Seus números foram liberados com sucesso!<br>
+                    Boa sorte! 🍀
+                </p>
+            </div>
         </div>
     </div>
 
@@ -836,8 +846,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">URL da Imagem</label>
-                    <input type="url" class="form-input" id="adminImage" placeholder="https://exemplo.com/imagem.jpg">
+                    <label class="form-label">Imagem do Prêmio</label>
+                    <input type="file" class="form-input" id="adminImageFile" accept="image/*" onchange="handleImageUpload(event)">
+                    <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 5px;">
+                        Ou use uma URL:
+                    </p>
+                    <input type="url" class="form-input" id="adminImage" placeholder="https://exemplo.com/imagem.jpg" style="margin-top: 5px;">
+                    <div id="imagePreview" style="margin-top: 10px; max-width: 200px; border-radius: 10px; overflow: hidden; border: 2px solid var(--purple); display: none;">
+                        <img id="previewImg" style="width: 100%; height: auto;">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -861,11 +878,17 @@
                 </div>
 
                 <button class="btn-primary" onclick="saveRaffleConfig()">💾 Salvar Configurações</button>
+                <button class="btn-primary" onclick="finishRaffle()" style="background: linear-gradient(135deg, #ff4444, #cc0000); margin-left: 10px;">
+                    🏁 Finalizar Rifa
+                </button>
             </div>
 
             <!-- Estatísticas -->
             <div class="admin-section">
                 <h2 class="admin-section-title">📊 Estatísticas</h2>
+                <button class="btn-primary" onclick="exportSales()" style="margin-bottom: 20px; background: linear-gradient(135deg, #00ff88, #00dd77); color: black;">
+                    📥 Exportar Vendas (TXT)
+                </button>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-label">Total Vendido</div>
@@ -975,7 +998,19 @@
                 }
 
                 if (!data) {
-                    throw new Error('Nenhuma rifa ativa encontrada');
+                    document.getElementById('loadingMessage').innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px;">
+                            <div style="font-size: 64px; margin-bottom: 20px;">🎰</div>
+                            <h2 style="font-size: 28px; color: var(--purple); margin-bottom: 15px;">
+                                Sem Rifas Ativas
+                            </h2>
+                            <p style="color: rgba(255,255,255,0.6); font-size: 16px;">
+                                Não há nenhuma rifa ativa no momento.<br>
+                                Aguarde novas rifas em breve!
+                            </p>
+                        </div>
+                    `;
+                    return;
                 }
 
                 currentRaffle = data;
@@ -1158,72 +1193,69 @@
             }
         }
 
-        // Gerar pagamento PIX com Mercado Pago (via Netlify Function)
-async function generatePixPayment(saleData, amount, numbers) {
-    try {
-        console.log('💳 Gerando PIX...');
-        console.log('💵 Amount recebido:', amount, 'Tipo:', typeof amount);
+        // Gerar pagamento PIX com Mercado Pago
+        async function generatePixPayment(saleData, amount, numbers) {
+            try {
+                console.log('💳 Gerando PIX...');
+                console.log('💵 Amount recebido:', amount, 'Tipo:', typeof amount);
+                
+                // Mostrar modal de loading
+                document.getElementById('pixModal').style.display = 'flex';
+                document.getElementById('pixModal').classList.add('active');
+                document.getElementById('pixLoading').style.display = 'block';
+                document.getElementById('pixContent').style.display = 'none';
 
-        // Mostrar modal de loading
-        document.getElementById('pixModal').style.display = 'flex';
-        document.getElementById('pixModal').classList.add('active');
-        document.getElementById('pixLoading').style.display = 'block';
-        document.getElementById('pixContent').style.display = 'none';
+                const paymentData = {
+                    transaction_amount: amount,
+                    description: `Rifa ${currentRaffle.title} - Números: ${numbers.join(', ')}`,
+                    payment_method_id: 'pix',
+                    payer: {
+                        email: CLIENT_EMAIL,
+                        first_name: saleData.buyer_name.split(' ')[0],
+                        last_name: saleData.buyer_name.split(' ').slice(1).join(' ') || saleData.buyer_name
+                    },
+                    notification_url: window.location.origin + '/.netlify/functions/webhook',
+                    external_reference: saleData.id
+                };
+                
+                console.log('📤 Enviando para MP:', paymentData);
 
-        const paymentData = {
-            transaction_amount: amount,
-            description: `Rifa ${currentRaffle.title} - Números: ${numbers.join(', ')}`,
-            payer: {
-                email: CLIENT_EMAIL,
-                first_name: saleData.buyer_name.split(' ')[0],
-                last_name: saleData.buyer_name.split(' ').slice(1).join(' ') || saleData.buyer_name
-            },
-            external_reference: saleData.id
-        };
+                // Chamar Netlify Function para criar pagamento PIX REAL
+                const response = await fetch('/.netlify/functions/create-pix', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(paymentData)
+                });
 
-        console.log('📤 Enviando para Netlify Function:', paymentData);
+                const pixData = await response.json();
 
-        // 🔥 CHAMADA CORRETA PARA A FUNCTION
-        const response = await fetch('/.netlify/functions/create-pix', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(paymentData)
-        });
+                if (pixData.point_of_interaction && pixData.point_of_interaction.transaction_data) {
+                    const qrCode = pixData.point_of_interaction.transaction_data.qr_code_base64;
+                    const pixCodeString = pixData.point_of_interaction.transaction_data.qr_code;
 
-        const pixData = await response.json();
-        console.log('📥 Resposta PIX:', pixData);
+                    // Atualizar venda com payment_id
+                    await supabaseClient
+                        .from('raffle_sales')
+                        .update({ payment_id: pixData.id })
+                        .eq('id', saleData.id);
 
-        if (!pixData.qr_code_base64 || !pixData.qr_code) {
-            throw new Error('Resposta PIX inválida');
+                    // Mostrar QR Code
+                    displayPixQRCode(qrCode, pixCodeString, pixData.id, saleData.id);
+
+                    // Iniciar verificação de pagamento
+                    startPaymentCheck(pixData.id, saleData.id);
+                } else {
+                    throw new Error('Erro ao gerar PIX');
+                }
+
+            } catch (error) {
+                console.error('Erro ao gerar PIX:', error);
+                document.getElementById('pixModal').classList.remove('active');
+                alert('❌ Erro ao gerar pagamento PIX. Por favor, tente novamente.');
+            }
         }
-
-        // Atualizar venda com payment_id
-        await supabaseClient
-            .from('raffle_sales')
-            .update({ payment_id: pixData.id })
-            .eq('id', saleData.id);
-
-        // Mostrar QR Code
-        displayPixQRCode(
-            pixData.qr_code_base64,
-            pixData.qr_code,
-            pixData.id,
-            saleData.id
-        );
-            startPaymentCheck(pixData.id, saleData.id);
-
-        // (opcional depois) iniciar verificação de pagamento
-        // startPaymentCheck(pixData.id, saleData.id);
-
-    } catch (error) {
-        console.error('❌ Erro ao gerar PIX:', error);
-        document.getElementById('pixModal').classList.remove('active');
-        alert('❌ Erro ao gerar pagamento PIX. Tente novamente.');
-    }
-}
-
 
         // Exibir QR Code PIX
         function displayPixQRCode(qrCodeBase64, pixCodeString, paymentId, saleId) {
@@ -1259,71 +1291,63 @@ async function generatePixPayment(saleData, amount, numbers) {
             }
         }
 
-    // Fechar modal PIX
-function closePixModal(reload = true) {
-    document.getElementById('pixModal').classList.remove('active');
-    document.getElementById('pixModal').style.display = 'none';
-
-    if (window.paymentCheckInterval) {
-        clearInterval(window.paymentCheckInterval);
-        window.paymentCheckInterval = null;
-    }
-
-    if (reload) {
-        location.reload();
-    }
-}
-
-// Verificar status do pagamento
-async function startPaymentCheck(paymentId, saleId) {
-    let attempts = 0;
-    const maxAttempts = 60; // 15 minutos (60 * 15s)
-
-    window.paymentCheckInterval = setInterval(async () => {
-        attempts++;
-
-        if (attempts >= maxAttempts) {
-            clearInterval(window.paymentCheckInterval);
-            alert('⏱️ Tempo expirado. Se você já pagou, seus números serão liberados automaticamente.');
-            closePixModal();
-            return;
-        }
-
-        try {
-            const { data, error } = await supabaseClient
-                .from('raffle_sales')
-                .select('payment_status')
-                .eq('id', saleId)
-                .single();
-
-            if (error) {
-                console.error('Erro Supabase:', error);
-                return;
-            }
-
-            if (data?.payment_status === 'approved') {
+        // Fechar modal PIX
+        function closePixModal() {
+            document.getElementById('pixModal').classList.remove('active');
+            document.getElementById('pixModal').style.display = 'none';
+            if (window.paymentCheckInterval) {
                 clearInterval(window.paymentCheckInterval);
-
-                // some QR
-                document.getElementById('pixContent').style.display = 'none';
-                document.getElementById('pixLoading').style.display = 'none';
-
-                // mostra mini popup obrigado
-                document.getElementById('thankYouMini').style.display = 'block';
-
-                // fecha modal depois de 3s
-                setTimeout(() => {
-                    closePixModal(true);
-                }, 3000);
             }
-
-        } catch (err) {
-            console.error('Erro ao verificar pagamento:', err);
+            // Recarregar para atualizar números
+            location.reload();
         }
 
-    }, 15000); // verifica a cada 15s
-}
+        // Verificar status do pagamento
+        async function startPaymentCheck(paymentId, saleId) {
+            let attempts = 0;
+            const maxAttempts = 60; // 15 minutos (60 * 15s)
 
+            window.paymentCheckInterval = setInterval(async () => {
+                attempts++;
+
+                if (attempts >= maxAttempts) {
+                    clearInterval(window.paymentCheckInterval);
+                    alert('⏱️ Tempo expirado. Se você já pagou, seus números serão liberados automaticamente.');
+                    closePixModal();
+                    return;
+                }
+
+                try {
+                    // Verificar status no Supabase
+                    const { data, error } = await supabaseClient
+                        .from('raffle_sales')
+                        .select('payment_status')
+                        .eq('id', saleId)
+                        .single();
+
+                    if (data && data.payment_status === 'approved') {
+                        clearInterval(window.paymentCheckInterval);
+                        
+                        // Mostrar sucesso
+                        alert('🎉 Pagamento confirmado! Seus números foram reservados com sucesso!');
+                        closePixModal();
+                        
+                        // Recarregar página para mostrar números vendidos
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar pagamento:', error);
+                }
+            }, 15000); // Verificar a cada 15 segundos
+        }
+
+        // Simular pagamento (REMOVER EM PRODUÇÃO - apenas para testes)
+        function simulatePayment(saleId) {
+            alert('🔄 Sistema de pagamento em desenvolvimento.\n\nEm produção, aqui geraria o QR Code PIX do Mercado Pago.');
+            selectedNumbers.clear();
+            updateNumbersDisplay();
+            updateCheckout();
+        }
 
         // ADMIN FUNCTIONS
 
@@ -1354,6 +1378,12 @@ async function startPaymentCheck(paymentId, saleId) {
             document.getElementById('adminPromoDiscount').value = currentRaffle.promo_discount || '';
             document.getElementById('adminPromoMinNumbers').value = currentRaffle.promo_min_numbers || '';
 
+            // Mostrar preview da imagem se existir
+            if (currentRaffle.image_url) {
+                document.getElementById('previewImg').src = currentRaffle.image_url;
+                document.getElementById('imagePreview').style.display = 'block';
+            }
+
             togglePromoFields();
 
             // Carregar vendas
@@ -1367,6 +1397,21 @@ async function startPaymentCheck(paymentId, saleId) {
         }
 
         document.getElementById('adminPromoEnabled').addEventListener('change', togglePromoFields);
+
+        // Upload de imagem
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                document.getElementById('adminImage').value = base64;
+                document.getElementById('previewImg').src = base64;
+                document.getElementById('imagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
 
         async function saveRaffleConfig() {
             if (!currentRaffle || !currentRaffle.id) {
@@ -1397,6 +1442,87 @@ async function startPaymentCheck(paymentId, saleId) {
             } catch (error) {
                 console.error('Erro ao salvar:', error);
                 alert('❌ Erro ao salvar configurações: ' + error.message);
+            }
+        }
+
+        // Finalizar rifa
+        async function finishRaffle() {
+            if (!currentRaffle || !currentRaffle.id) {
+                alert('❌ Erro: Nenhuma rifa carregada.');
+                return;
+            }
+
+            if (!confirm('🏁 Tem certeza que deseja FINALIZAR esta rifa?\n\nEsta ação irá:\n- Desativar a rifa\n- Não será mais possível vender números\n- Você poderá criar uma nova rifa\n\nConfirmar?')) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('raffles')
+                    .update({ active: false })
+                    .eq('id', currentRaffle.id);
+
+                if (error) throw error;
+
+                alert('✅ Rifa finalizada com sucesso!\n\nAgora você pode criar uma nova rifa no painel admin.');
+                location.reload();
+            } catch (error) {
+                console.error('Erro ao finalizar rifa:', error);
+                alert('❌ Erro ao finalizar rifa: ' + error.message);
+            }
+        }
+
+        // Exportar vendas
+        async function exportSales() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('raffle_sales')
+                    .select('*')
+                    .eq('raffle_id', currentRaffle.id)
+                    .eq('payment_status', 'approved')
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    alert('ℹ️ Nenhuma venda aprovada para exportar.');
+                    return;
+                }
+
+                // Gerar conteúdo TXT
+                let txtContent = `RELATÓRIO DE VENDAS - ${currentRaffle.title}\n`;
+                txtContent += `Data de Exportação: ${new Date().toLocaleString('pt-BR')}\n`;
+                txtContent += `Total de Compradores: ${data.length}\n`;
+                txtContent += `Total Arrecadado: R$ ${data.reduce((sum, s) => sum + s.total_amount, 0).toFixed(2)}\n`;
+                txtContent += `\n${'='.repeat(80)}\n\n`;
+
+                data.forEach((sale, index) => {
+                    txtContent += `COMPRADOR #${index + 1}\n`;
+                    txtContent += `Nome: ${sale.buyer_name}\n`;
+                    txtContent += `WhatsApp: ${sale.buyer_phone}\n`;
+                    txtContent += `Números Comprados: ${sale.numbers.sort((a, b) => a - b).join(', ')}\n`;
+                    txtContent += `Quantidade: ${sale.numbers.length} número(s)\n`;
+                    txtContent += `Valor Pago: R$ ${sale.total_amount.toFixed(2)}\n`;
+                    txtContent += `Data da Compra: ${new Date(sale.created_at).toLocaleString('pt-BR')}\n`;
+                    txtContent += `${'-'.repeat(80)}\n\n`;
+                });
+
+                // Download do arquivo
+                const blob = new Blob([txtContent], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `vendas-rifa-${currentRaffle.title.replace(/\s+/g, '-')}-${Date.now()}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                alert('✅ Relatório exportado com sucesso!');
+
+            } catch (error) {
+                console.error('Erro ao exportar:', error);
+                alert('❌ Erro ao exportar vendas: ' + error.message);
             }
         }
 
