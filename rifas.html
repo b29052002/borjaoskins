@@ -804,10 +804,13 @@
                     <p style="color: #00ff88; font-weight: 700; margin-bottom: 10px;">
                         ⏱️ Aguardando pagamento...
                     </p>
-                    <p style="font-size: 14px; color: rgba(255,255,255,0.7);">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 15px;">
                         Seus números estão reservados por 15 minutos.<br>
                         Assim que o pagamento for confirmado, você receberá seus números!
                     </p>
+                    <button onclick="closePixModal(true)" style="width: 100%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px;">
+                        ✕ Fechar e Verificar Depois
+                    </button>
                 </div>
             </div>
 
@@ -867,6 +870,14 @@
                     <input type="number" class="form-input" id="adminTotalNumbers" placeholder="100" min="10" max="10000" value="100">
                     <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 5px;">
                         Escolha quantos números terá a rifa (ex: 50, 100, 500, 1000)
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Limite de Cotas por Pessoa</label>
+                    <input type="number" class="form-input" id="adminMaxPerPerson" placeholder="0" min="0" max="100" value="0">
+                    <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 5px;">
+                        0 = sem limite | Ex: 5 = cada pessoa pode comprar no máximo 5 números
                     </p>
                 </div>
 
@@ -1165,10 +1176,65 @@
             const name = prompt('Digite seu nome completo:');
             if (!name || name.trim() === '') return;
 
-            const phone = prompt('Digite seu WhatsApp (com DDD):');
+            let phone = prompt('Digite seu WhatsApp (com DDD):\nExemplo: 11987654321');
             if (!phone || phone.trim() === '') return;
 
+            // Limpar telefone (remover espaços, parênteses, traços)
+            phone = phone.replace(/\D/g, '');
+
+            // Validar telefone brasileiro (10 ou 11 dígitos)
+            if (phone.length < 10 || phone.length > 11) {
+                alert('❌ Telefone inválido!\n\nDigite o WhatsApp com DDD (10 ou 11 números).\nExemplo: 11987654321');
+                return;
+            }
+
+            // Verificar se começa com DDD válido (11-99)
+            const ddd = parseInt(phone.substring(0, 2));
+            if (ddd < 11 || ddd > 99) {
+                alert('❌ DDD inválido!\n\nDigite um DDD válido (11 a 99).\nExemplo: 11987654321');
+                return;
+            }
+
             try {
+                // Verificar limite de cotas por pessoa
+                if (currentRaffle.max_per_person && currentRaffle.max_per_person > 0) {
+                    console.log('🔍 Verificando limite de cotas para telefone:', phone);
+                    
+                    // Buscar todas as vendas aprovadas deste telefone
+                    const { data: previousSales, error: salesError } = await supabaseClient
+                        .from('raffle_sales')
+                        .select('numbers')
+                        .eq('raffle_id', currentRaffle.id)
+                        .eq('buyer_phone', phone)
+                        .eq('payment_status', 'approved');
+
+                    if (salesError) throw salesError;
+
+                    // Contar quantas cotas a pessoa já comprou
+                    let totalBought = 0;
+                    if (previousSales && previousSales.length > 0) {
+                        previousSales.forEach(sale => {
+                            totalBought += sale.numbers.length;
+                        });
+                    }
+
+                    console.log('📊 Cotas já compradas:', totalBought);
+                    console.log('📊 Cotas selecionadas agora:', selectedNumbers.size);
+                    console.log('📊 Limite configurado:', currentRaffle.max_per_person);
+
+                    const totalAfterPurchase = totalBought + selectedNumbers.size;
+
+                    if (totalAfterPurchase > currentRaffle.max_per_person) {
+                        const remaining = currentRaffle.max_per_person - totalBought;
+                        alert(`❌ Limite de cotas por pessoa atingido!\n\n` +
+                              `Você já comprou: ${totalBought} cota(s)\n` +
+                              `Tentando comprar: ${selectedNumbers.size} cota(s)\n` +
+                              `Limite máximo: ${currentRaffle.max_per_person} cota(s)\n\n` +
+                              `Você pode comprar no máximo mais ${remaining} cota(s).`);
+                        return;
+                    }
+                }
+
                 // Pegar valor total exibido e converter corretamente
                 const totalText = document.getElementById('totalPrice').textContent;
                 console.log('📝 Total text:', totalText);
@@ -1184,7 +1250,7 @@
                     .insert({
                         raffle_id: currentRaffle.id,
                         buyer_name: name.trim(),
-                        buyer_phone: phone.trim(),
+                        buyer_phone: phone,
                         numbers: numbersArray,
                         total_amount: totalAmount,
                         payment_status: 'reserved',
@@ -1355,12 +1421,16 @@
             let attempts = 0;
             const maxAttempts = 60; // 15 minutos (60 * 15s)
 
+            // Mostrar aviso sobre aprovação manual
+            console.log('🔄 Iniciando verificação de pagamento...');
+            console.log('💡 Caso o pagamento não seja detectado automaticamente, use o painel admin para aprovar manualmente.');
+
             window.paymentCheckInterval = setInterval(async () => {
                 attempts++;
 
                 if (attempts >= maxAttempts) {
                     clearInterval(window.paymentCheckInterval);
-                    alert('⏱️ Tempo expirado. Se você já pagou, seus números serão liberados automaticamente.');
+                    alert('⏱️ Tempo expirado.\n\n✅ Se você já pagou, seus números serão liberados automaticamente em breve.\n\n💡 Ou entre no painel admin (⚙️) e aprove manualmente em "Vendas Realizadas".');
                     closePixModal();
                     return;
                 }
@@ -1423,6 +1493,7 @@
             document.getElementById('adminImage').value = currentRaffle.image_url || '';
             document.getElementById('adminPrice').value = currentRaffle.price_per_number || '';
             document.getElementById('adminTotalNumbers').value = currentRaffle.total_numbers || 100;
+            document.getElementById('adminMaxPerPerson').value = currentRaffle.max_per_person || 0;
             document.getElementById('adminPromoEnabled').checked = currentRaffle.promo_enabled || false;
             document.getElementById('adminPromoDiscount').value = currentRaffle.promo_discount || '';
             document.getElementById('adminPromoMinNumbers').value = currentRaffle.promo_min_numbers || '';
@@ -1475,6 +1546,7 @@
                     image_url: document.getElementById('adminImage').value,
                     price_per_number: parseFloat(document.getElementById('adminPrice').value),
                     total_numbers: parseInt(document.getElementById('adminTotalNumbers').value) || 100,
+                    max_per_person: parseInt(document.getElementById('adminMaxPerPerson').value) || 0,
                     promo_enabled: document.getElementById('adminPromoEnabled').checked,
                     promo_discount: parseInt(document.getElementById('adminPromoDiscount').value) || 0,
                     promo_min_numbers: parseInt(document.getElementById('adminPromoMinNumbers').value) || 0
