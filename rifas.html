@@ -1240,7 +1240,17 @@
                     body: JSON.stringify(paymentData)
                 });
 
+                console.log('📥 Response status:', response.status);
+                console.log('📥 Response ok:', response.ok);
+                
                 const pixData = await response.json();
+                console.log('📥 PixData completo:', pixData);
+
+                // Verificar se houve erro
+                if (!response.ok || pixData.error) {
+                    console.error('❌ Erro na resposta:', pixData);
+                    throw new Error(pixData.error || pixData.message || 'Erro ao gerar PIX');
+                }
 
                 if (pixData.point_of_interaction && pixData.point_of_interaction.transaction_data) {
                     const qrCode = pixData.point_of_interaction.transaction_data.qr_code_base64;
