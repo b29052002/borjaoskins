@@ -138,7 +138,8 @@
         .raffle-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* ✅ Mostra a imagem completa sem cortar */
+            background: rgba(0, 0, 0, 0.3); /* Fundo caso sobre espaço */
         }
 
         .raffle-info {
@@ -1001,6 +1002,12 @@
                 await loadSoldNumbers();
                 renderNumbers();
                 updateCheckout();
+                
+                // 🔄 Atualizar números vendidos/reservados a cada 10 segundos
+                setInterval(async () => {
+                    await loadSoldNumbers();
+                    renderNumbers();
+                }, 10000); // 10 segundos
             }
         }
 
@@ -1084,7 +1091,7 @@
             document.getElementById('raffleContent').style.display = 'block';
         }
 
-        // Carregar números vendidos
+        // Carregar números vendidos E reservados
         async function loadSoldNumbers() {
             if (!currentRaffle || !currentRaffle.id) {
                 console.error('Rifa não carregada');
@@ -1092,11 +1099,14 @@
             }
 
             try {
+                // Buscar números APROVADOS e RESERVADOS (últimos 2 minutos)
+                const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+                
                 const { data, error } = await supabaseClient
                     .from('raffle_sales')
-                    .select('numbers')
+                    .select('numbers, payment_status, created_at')
                     .eq('raffle_id', currentRaffle.id)
-                    .eq('payment_status', 'approved');
+                    .or(`payment_status.eq.approved,and(payment_status.eq.reserved,created_at.gte.${twoMinutesAgo})`);
 
                 if (error) throw error;
 
@@ -1182,6 +1192,29 @@
                 console.log('🎁 Total com desconto:', total);
             }
 
+            // ⚠️ VERIFICAR LIMITE DE COTAS
+            if (currentRaffle.max_per_person && currentRaffle.max_per_person > 0) {
+                const limit = currentRaffle.max_per_person;
+                const checkoutBtn = document.getElementById('checkoutBtn');
+                
+                if (count > limit) {
+                    // Ultrapassou o limite
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.textContent = `❌ Limite: ${limit} números por pessoa`;
+                    checkoutBtn.style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
+                    return;
+                } else if (count > 0) {
+                    // Dentro do limite
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = `Finalizar Compra via PIX (${count}/${limit} cotas)`;
+                    checkoutBtn.style.background = 'linear-gradient(135deg, var(--purple), #6b1fa0)';
+                }
+            } else {
+                // Sem limite
+                document.getElementById('checkoutBtn').textContent = 'Finalizar Compra via PIX';
+                document.getElementById('checkoutBtn').style.background = 'linear-gradient(135deg, var(--purple), #6b1fa0)';
+            }
+
             document.getElementById('totalPrice').textContent = `R$ ${total.toFixed(2)}`;
             document.getElementById('checkoutBtn').disabled = count === 0;
         }
@@ -1190,7 +1223,7 @@
         async function initCheckout() {
             if (selectedNumbers.size === 0) return;
 
-            const name = prompt('Digite seu nome completo:');
+            const name = prompt('Digite seu nome e sobrenome:');
             if (!name || name.trim() === '') return;
 
             let phone = prompt('Digite seu WhatsApp (com DDD):\nExemplo: 11987654321');
@@ -1723,36 +1756,54 @@
                     return;
                 }
 
-                // Gerar conteúdo TXT
-                let txtContent = `RELATÓRIO DE VENDAS - ${currentRaffle.title}\n`;
+                // Criar mapa: número → primeiro nome
+                const numberToName = {};
+                
+                data.forEach(sale => {
+                    // Pegar apenas o primeiro nome
+                    const firstName = sale.buyer_name.split(' ')[0];
+                    
+                    // Para cada número comprado, associar ao nome
+                    sale.numbers.forEach(num => {
+                        numberToName[num] = firstName;
+                    });
+                });
+
+                // Ordenar números
+                const sortedNumbers = Object.keys(numberToName)
+                    .map(n => parseInt(n))
+                    .sort((a, b) => a - b);
+
+                // Gerar conteúdo TXT no formato: 1-Nome, 2-Nome
+                let txtContent = `LISTA DE NÚMEROS - ${currentRaffle.title}\n`;
                 txtContent += `Data de Exportação: ${new Date().toLocaleString('pt-BR')}\n`;
-                txtContent += `Total de Compradores: ${data.length}\n`;
-                txtContent += `Total Arrecadado: R$ ${data.reduce((sum, s) => sum + s.total_amount, 0).toFixed(2)}\n`;
+                txtContent += `Total de Números Vendidos: ${sortedNumbers.length}\n`;
                 txtContent += `\n${'='.repeat(80)}\n\n`;
 
+                sortedNumbers.forEach(num => {
+                    txtContent += `${num} - ${numberToName[num]}\n`;
+                });
+
+                txtContent += `\n${'='.repeat(80)}\n\n`;
+                txtContent += `RESUMO DE COMPRADORES:\n\n`;
+
                 data.forEach((sale, index) => {
-                    txtContent += `COMPRADOR #${index + 1}\n`;
-                    txtContent += `Nome: ${sale.buyer_name}\n`;
-                    txtContent += `WhatsApp: ${sale.buyer_phone}\n`;
-                    txtContent += `Números Comprados: ${sale.numbers.sort((a, b) => a - b).join(', ')}\n`;
-                    txtContent += `Quantidade: ${sale.numbers.length} número(s)\n`;
-                    txtContent += `Valor Pago: R$ ${sale.total_amount.toFixed(2)}\n`;
-                    txtContent += `Data da Compra: ${new Date(sale.created_at).toLocaleString('pt-BR')}\n`;
-                    txtContent += `${'-'.repeat(80)}\n\n`;
+                    const firstName = sale.buyer_name.split(' ')[0];
+                    txtContent += `${firstName}: ${sale.numbers.length} número(s) - ${sale.numbers.sort((a, b) => a - b).join(', ')}\n`;
                 });
 
                 // Download do arquivo
-                const blob = new Blob([txtContent], { type: 'text/plain' });
+                const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `vendas-rifa-${currentRaffle.title.replace(/\s+/g, '-')}-${Date.now()}.txt`;
+                a.download = `numeros-rifa-${currentRaffle.title.replace(/\s+/g, '-')}-${Date.now()}.txt`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
 
-                alert('✅ Relatório exportado com sucesso!');
+                alert('✅ Lista de números exportada com sucesso!');
 
             } catch (error) {
                 console.error('Erro ao exportar:', error);
