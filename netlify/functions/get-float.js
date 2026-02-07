@@ -1,19 +1,13 @@
+const cache = {};
+
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
   };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
-
-  const inspectLink = event.queryStringParameters?.url;
-
-  console.log('📥 Inspect link:', inspectLink);
-
-  if (!inspectLink) {
+  const inspect = event.queryStringParameters?.url;
+  if (!inspect) {
     return {
       statusCode: 400,
       headers,
@@ -21,40 +15,42 @@ exports.handler = async (event) => {
     };
   }
 
+  // Cache por 5 minutos
+  if (cache[inspect] && Date.now() - cache[inspect].time < 300000) {
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(cache[inspect].data)
+    };
+  }
+
   try {
-    // Chamada real para API de inspect
-    const apiUrl = `https://api.csfloat.com/?url=${encodeURIComponent(inspectLink)}`;
+    const api = `https://api.csfloat.com/?url=${encodeURIComponent(inspect)}`;
 
-    const response = await fetch(apiUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0'
-      }
-    });
-
+    const response = await fetch(api);
     const data = await response.json();
 
-    console.log('📦 CSFloat response:', data);
+    const result = {
+      success: true,
+      float: data?.iteminfo?.floatvalue || null
+    };
+
+    cache[inspect] = {
+      time: Date.now(),
+      data: result
+    };
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({
-        success: true,
-        float: data?.iteminfo?.floatvalue || null
-      })
+      body: JSON.stringify(result)
     };
 
-  } catch (error) {
-    console.error('💥 Erro:', error.message);
-
+  } catch (err) {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({
-        success: false,
-        float: null,
-        error: error.message
-      })
+      body: JSON.stringify({ success: false, error: err.message })
     };
   }
 };
