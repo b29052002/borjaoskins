@@ -149,7 +149,7 @@
             align-items: center;
             gap: 15px;
             background: rgba(255, 255, 255, 0.03);
-            border: 2px solid rgba(148, 49, 206, 0.8); /* Roxo destacado para top 16 */
+            border: 2px solid rgba(128, 128, 128, 0.2); /* Padrão cinza */
             border-radius: 12px;
             padding: 15px 20px;
             margin-bottom: 12px;
@@ -157,17 +157,46 @@
             animation: slideIn 0.5s ease backwards;
         }
 
-        /* Top 16 - Borda roxa bem destacada */
-        .ranking-item {
+        /* Top 3 - Borda roxa bem destacada */
+        .ranking-item:nth-child(1),
+        .ranking-item:nth-child(2),
+        .ranking-item:nth-child(3) {
             border-color: var(--purple);
             box-shadow: 0 0 15px rgba(148, 49, 206, 0.3);
+            background: rgba(148, 49, 206, 0.05);
         }
 
-        /* Após 16º - Cinza apagado, "desligado" */
+        /* Top 1 - MAIOR que os outros */
+        .ranking-item:nth-child(1) {
+            padding: 20px 25px; /* Padding maior */
+            transform: scale(1.05); /* 5% maior */
+            margin-bottom: 20px; /* Mais espaço embaixo */
+            box-shadow: 0 0 25px rgba(148, 49, 206, 0.5); /* Brilho mais forte */
+        }
+
+        .ranking-item:nth-child(1) .ranking-name {
+            font-size: 24px; /* Fonte maior */
+        }
+
+        .ranking-item:nth-child(1) .ranking-points-value {
+            font-size: 32px; /* Pontos maiores */
+        }
+
+        .ranking-item:nth-child(1) .ranking-medal {
+            font-size: 36px; /* Medalha maior */
+        }
+
+        /* 4º ao 16º - Cinza leve */
+        .ranking-item:nth-child(n+4):nth-child(-n+16) {
+            border-color: rgba(148, 49, 206, 0.3);
+            box-shadow: 0 0 8px rgba(148, 49, 206, 0.1);
+        }
+
+        /* 17º em diante - Cinza apagado, "desligado" */
         .ranking-item-inactive {
-            border-color: rgba(128, 128, 128, 0.2) !important;
+            border-color: rgba(128, 128, 128, 0.15) !important;
             background: rgba(255, 255, 255, 0.01) !important;
-            opacity: 0.5;
+            opacity: 0.4;
             box-shadow: none !important;
         }
 
@@ -176,7 +205,7 @@
         .ranking-item-inactive .ranking-numbers,
         .ranking-item-inactive .ranking-points-value,
         .ranking-item-inactive .ranking-points-label {
-            color: rgba(255, 255, 255, 0.4) !important;
+            color: rgba(255, 255, 255, 0.3) !important;
         }
 
         .ranking-item:hover {
@@ -185,10 +214,15 @@
             transform: translateX(5px);
         }
 
+        .ranking-item:nth-child(1):hover {
+            transform: scale(1.05) translateX(5px); /* Mantém escala ao hover */
+        }
+
         .ranking-item-inactive:hover {
             background: rgba(255, 255, 255, 0.02) !important;
-            border-color: rgba(128, 128, 128, 0.3) !important;
+            border-color: rgba(128, 128, 128, 0.25) !important;
             transform: translateX(2px);
+            opacity: 0.6;
         }
 
         /* Top 3 especial */
@@ -405,7 +439,7 @@
     <script>
         // ===== CONFIGURAÇÃO =====
         const SUPABASE_URL = 'https://yyoyxanloloupwoczkhr.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM'; // ⚠️ TROCAR
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM';
 
         // Criar cliente Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
