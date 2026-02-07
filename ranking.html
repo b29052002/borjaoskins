@@ -149,7 +149,7 @@
             align-items: center;
             gap: 15px;
             background: rgba(255, 255, 255, 0.03);
-            border: 2px solid rgba(148, 49, 206, 0.3);
+            border: 2px solid rgba(148, 49, 206, 0.8); /* Roxo destacado para top 16 */
             border-radius: 12px;
             padding: 15px 20px;
             margin-bottom: 12px;
@@ -157,10 +157,38 @@
             animation: slideIn 0.5s ease backwards;
         }
 
+        /* Top 16 - Borda roxa bem destacada */
+        .ranking-item {
+            border-color: var(--purple);
+            box-shadow: 0 0 15px rgba(148, 49, 206, 0.3);
+        }
+
+        /* Após 16º - Cinza apagado, "desligado" */
+        .ranking-item-inactive {
+            border-color: rgba(128, 128, 128, 0.2) !important;
+            background: rgba(255, 255, 255, 0.01) !important;
+            opacity: 0.5;
+            box-shadow: none !important;
+        }
+
+        .ranking-item-inactive .ranking-position,
+        .ranking-item-inactive .ranking-name,
+        .ranking-item-inactive .ranking-numbers,
+        .ranking-item-inactive .ranking-points-value,
+        .ranking-item-inactive .ranking-points-label {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+
         .ranking-item:hover {
             background: rgba(148, 49, 206, 0.1);
             border-color: var(--purple);
             transform: translateX(5px);
+        }
+
+        .ranking-item-inactive:hover {
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-color: rgba(128, 128, 128, 0.3) !important;
+            transform: translateX(2px);
         }
 
         /* Top 3 especial */
@@ -366,7 +394,7 @@
             <p style="margin-bottom: 15px;">⚡ Atualizado em tempo real</p>
             <a href="rifas.html" class="back-button">← Voltar para a Rifa</a>
             <p style="margin-top: 20px; font-size: 11px;">
-                © 2026 Borjão Skins - Todos os direitos reservados
+                © 2024 Borjão Skins - Todos os direitos reservados
             </p>
         </div>
     </div>
@@ -384,25 +412,44 @@
 
         // ===== CARREGAR RANKING =====
         async function loadRanking() {
+            console.log('🔵 loadRanking chamada!');
+            
             try {
-                // Buscar ranking da tabela ranking_points
+                console.log('📡 Conectando ao Supabase...');
+                console.log('URL:', SUPABASE_URL);
+                console.log('KEY presente:', SUPABASE_KEY ? 'Sim' : 'Não');
+                
+                // Buscar ranking da tabela ranking_cache
+                console.log('📊 Buscando dados de ranking_cache...');
                 const { data: ranking, error } = await supabaseClient
-                    .from('ranking_points')
+                    .from('ranking_cache')
                     .select('*')
                     .order('total_points', { ascending: false })
                     .limit(100); // Top 100
 
-                if (error) throw error;
+                console.log('📥 Resposta do Supabase:');
+                console.log('Data:', ranking);
+                console.log('Error:', error);
+
+                if (error) {
+                    console.error('❌ Erro do Supabase:', error);
+                    throw error;
+                }
 
                 if (!ranking || ranking.length === 0) {
+                    console.log('⚠️ Nenhum dado retornado');
                     showEmpty('Nenhum comprador ainda. Seja o primeiro!');
                     return;
                 }
 
+                console.log(`✅ ${ranking.length} registros encontrados!`);
+
                 // Calcular estatísticas totais
                 const totalCompetitors = ranking.length;
-                const totalPoints = ranking.reduce((sum, r) => sum + parseFloat(r.total_points), 0);
-                const totalNumbers = ranking.reduce((sum, r) => sum + parseInt(r.total_numbers || 0), 0);
+                const totalPoints = ranking.reduce((sum, r) => sum + parseFloat(r.total_points || 0), 0);
+                const totalNumbers = ranking.reduce((sum, r) => sum + parseInt(r.total_purchases || 0), 0);
+
+                console.log('📊 Estatísticas:', { totalCompetitors, totalPoints, totalNumbers });
 
                 // Atualizar estatísticas
                 document.getElementById('totalCompetitors').textContent = totalCompetitors;
@@ -416,21 +463,27 @@
                 ranking.forEach((buyer, index) => {
                     const position = index + 1;
                     const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '';
-                    const firstName = buyer.buyer_name.split(' ')[0];
-                    const points = parseFloat(buyer.total_points).toFixed(2);
+                    const firstName = buyer.first_name || buyer.buyer_name?.split(' ')[0] || 'Anônimo';
+                    const points = Math.round(parseFloat(buyer.total_points || 0)); // Sem decimais
+                    const purchases = parseInt(buyer.total_purchases || 0);
                     
                     const item = document.createElement('div');
                     item.className = 'ranking-item';
                     item.style.animationDelay = `${index * 0.1}s`;
                     
+                    // Top 16 com borda roxa, resto com borda cinza apagada
+                    if (position > 16) {
+                        item.classList.add('ranking-item-inactive');
+                    }
+                    
                     item.innerHTML = `
                         ${medal ? `<div class="ranking-medal">${medal}</div>` : `<div class="ranking-position">${position}º</div>`}
                         <div class="ranking-info-box">
                             <div class="ranking-name">${firstName}</div>
-                            <div class="ranking-numbers">${buyer.total_numbers} número(s) • ${buyer.total_purchases} compra(s)</div>
+                            <div class="ranking-numbers">${purchases} compra(s)</div>
                         </div>
                         <div class="ranking-points">
-                            <div class="ranking-points-value">R$ ${points}</div>
+                            <div class="ranking-points-value">${points}</div>
                             <div class="ranking-points-label">pontos</div>
                         </div>
                     `;
@@ -438,13 +491,17 @@
                     container.appendChild(item);
                 });
 
+                console.log('✅ Ranking renderizado com sucesso!');
+
                 // Mostrar ranking
                 document.getElementById('loadingMessage').style.display = 'none';
                 container.style.display = 'block';
 
             } catch (error) {
-                console.error('Erro ao carregar ranking:', error);
-                showEmpty('Erro ao carregar ranking. Tente novamente.');
+                console.error('❌ Erro ao carregar ranking:', error);
+                console.error('Detalhes:', error.message);
+                console.error('Stack:', error.stack);
+                showEmpty('Erro ao carregar ranking. Veja o console (F12).');
             }
         }
 
