@@ -796,6 +796,25 @@
             return null;
         }
 
+        // Buscar float real da API CSFloat
+        async function getFloat(inspectLink) {
+            if (!inspectLink) return null;
+            
+            try {
+                const response = await fetch(`https://api.csfloat.com/?url=${encodeURIComponent(inspectLink)}`);
+                
+                if (!response.ok) {
+                    return null;
+                }
+                
+                const data = await response.json();
+                return data?.iteminfo?.floatvalue || null;
+            } catch (error) {
+                console.error('Erro ao buscar float:', error);
+                return null;
+            }
+        }
+
         async function loadInventoryAdmin() {
             const tradeUrl = document.getElementById('adminTradeUrl').value.trim();
             const btn = document.getElementById('btnLoadAdmin');
@@ -841,12 +860,27 @@
 
                 const tradableItems = [];
                 
+                let processedCount = 0;
                 for (const asset of data.assets) {
                     const desc = descMap[`${asset.classid}_${asset.instanceid}`];
                     if (!desc || desc.tradable !== 1) continue;
 
                     const inspectLink = desc.actions?.[0]?.link || null;
-                    const floatValue = inspectLink ? extractFloat(inspectLink) : null;
+                    
+                    // Buscar float real da API CSFloat
+                    let floatValue = null;
+                    if (inspectLink) {
+                        const fullInspectLink = inspectLink
+                            .replace('%owner_steamid%', '')
+                            .replace('%assetid%', asset.assetid);
+                        floatValue = await getFloat(fullInspectLink);
+                        
+                        // Atualizar status a cada 10 itens
+                        processedCount++;
+                        if (processedCount % 10 === 0) {
+                            showAdminStatus(`⏳ Buscando floats... ${processedCount}/${data.assets.length}`, '');
+                        }
+                    }
 
                     const item = {
                         asset_id: asset.assetid,
@@ -859,7 +893,7 @@
                         rarity: desc.tags?.find(t => t.category === 'Rarity')?.localized_tag_name || 'Normal',
                         rarity_color: desc.name_color ? '#' + desc.name_color : '#b0b0b0',
                         wear: desc.tags?.find(t => t.category === 'Exterior')?.localized_tag_name || 'N/A',
-                        float_value: floatValue ? parseFloat(floatValue) : null,
+                        float_value: floatValue,
                         image_url: desc.icon_url ? `https://community.cloudflare.steamstatic.com/economy/image/${desc.icon_url}` : null,
                         inspect_link: inspectLink,
                         tradable: true,
