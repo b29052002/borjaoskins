@@ -1,5 +1,3 @@
-const https = require('https');
-
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -13,6 +11,8 @@ exports.handler = async (event) => {
 
   const inspectLink = event.queryStringParameters?.url;
   
+  console.log('📥 Inspect link:', inspectLink);
+  
   if (!inspectLink) {
     return {
       statusCode: 400,
@@ -22,28 +22,32 @@ exports.handler = async (event) => {
   }
 
   try {
-    const apiUrl = `https://api.csfloat.com/?url=${encodeURIComponent(inspectLink)}`;
+    // Extrair float do D-value no inspect link
+    // Formato: steam://rungame/730/.../+csgo_econ_action_preview S{owner}A{asset}D{float_encoded}
+    const dMatch = inspectLink.match(/D(\d+)/);
     
-    const data = await new Promise((resolve, reject) => {
-      https.get(apiUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0'
-        }
-      }, (res) => {
-        let body = '';
-        res.on('data', chunk => body += chunk);
-        res.on('end', () => {
-          try {
-            resolve(JSON.parse(body));
-          } catch (e) {
-            reject(new Error('JSON inválido'));
-          }
-        });
-      }).on('error', reject);
-    });
+    if (!dMatch) {
+      console.log('⚠️ Nenhum D-value encontrado');
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          float: null,
+          error: 'No D-value found in link'
+        })
+      };
+    }
 
-    // Extrair float
-    const floatValue = data?.iteminfo?.floatvalue || null;
+    const dValue = dMatch[1];
+    console.log('🔍 D-value:', dValue);
+
+    // Converter D-value para float
+    // Float = D-value / (2^64 - 1)
+    // Aproximação: D-value / 10^16
+    const floatValue = parseFloat(dValue) / 10000000000000000;
+    
+    console.log('🎯 Float:', floatValue);
 
     return {
       statusCode: 200,
@@ -51,18 +55,20 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         success: true,
         float: floatValue,
-        data: data
+        method: 'd_value'
       })
     };
 
   } catch (error) {
-    console.error('Erro:', error);
+    console.error('💥 Erro:', error.message);
+    
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({ 
         error: error.message,
-        float: null
+        float: null,
+        success: false
       })
     };
   }
