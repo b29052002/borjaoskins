@@ -732,17 +732,435 @@
         </div>
     </div>
 
-    <button class="admin-btn" onclick="openAdmin()" title="Admin">⚙️</button>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
+        // ===== CONFIGURAÇÃO SUPABASE =====
+        const SUPABASE_URL = 'https://yyoyxanloloupwoczkhr.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const ADMIN_PASSWORD = 'borjao777';
-        const STORAGE_KEY = 'borjao_inventory';
         const WHATSAPP_KEY = 'borjao_whatsapp';
 
         let allItems = [];
         let filteredItems = [];
         let currentPage = 1;
         let itemsPerPage = 12;
+
+        // Admin functions
+        function openAdmin() {
+            const password = prompt('🔐 Digite a senha:');
+            if (password !== ADMIN_PASSWORD) {
+                alert('❌ Senha incorreta!');
+                return;
+            }
+            document.getElementById('adminPanel').classList.add('active');
+            loadAdminSettings();
+        }
+
+        function closeAdmin() {
+            document.getElementById('adminPanel').classList.remove('active');
+        }
+
+        function loadAdminSettings() {
+            const whatsapp = localStorage.getItem(WHATSAPP_KEY) || '5511999999999';
+            document.getElementById('whatsappNumber').value = whatsapp;
+        }
+
+        function saveWhatsapp() {
+            const number = document.getElementById('whatsappNumber').value.trim();
+            if (!number) {
+                alert('❌ Digite um número válido!');
+                return;
+            }
+            localStorage.setItem(WHATSAPP_KEY, number);
+            alert('✅ Número do WhatsApp salvo!');
+        }
+
+        function extractSteamID(tradeUrl) {
+            const match = tradeUrl.match(/partner=(\d+)/);
+            if (match) {
+                const partnerId = match[1];
+                return (BigInt(partnerId) + BigInt('76561197960265728')).toString();
+            }
+            return null;
+        }
+
+        // Extrair float do inspect link
+        function extractFloat(inspectLink) {
+            if (!inspectLink) return null;
+            const match = inspectLink.match(/D(\d+)/);
+            if (match) {
+                const d = parseInt(match[1]);
+                return (d / 10000000000000000).toFixed(10);
+            }
+            return null;
+        }
+
+        async function loadInventoryAdmin() {
+            const tradeUrl = document.getElementById('adminTradeUrl').value.trim();
+            const btn = document.getElementById('btnLoadAdmin');
+            const status = document.getElementById('adminStatus');
+
+            if (!tradeUrl) {
+                showAdminStatus('❌ Cole o Trade URL!', 'error');
+                return;
+            }
+
+            const steamId = extractSteamID(tradeUrl);
+            if (!steamId) {
+                showAdminStatus('❌ Trade URL inválido!', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            showAdminStatus('⏳ Carregando inventário da Steam...', '');
+
+            try {
+                // Buscar inventário da Steam
+                const response = await fetch(`/.netlify/functions/get-inventory?steamId=${steamId}`);
+                
+                if (!response.ok) {
+                    const result = await response.json();
+                    throw new Error(result.error || result.message || 'Erro ao carregar');
+                }
+
+                const result = await response.json();
+                const data = result.data;
+
+                if (!data || !data.assets || data.assets.length === 0) {
+                    throw new Error('Nenhum item encontrado no inventário');
+                }
+
+                showAdminStatus('⏳ Processando itens trocáveis...', '');
+
+                // Processar itens
+                const descMap = {};
+                data.descriptions.forEach(desc => {
+                    descMap[`${desc.classid}_${desc.instanceid}`] = desc;
+                });
+
+                const tradableItems = [];
+                
+                for (const asset of data.assets) {
+                    const desc = descMap[`${asset.classid}_${asset.instanceid}`];
+                    if (!desc || desc.tradable !== 1) continue;
+
+                    const inspectLink = desc.actions?.[0]?.link || null;
+                    const floatValue = inspectLink ? extractFloat(inspectLink) : null;
+
+                    const item = {
+                        asset_id: asset.assetid,
+                        class_id: asset.classid,
+                        instance_id: asset.instanceid,
+                        name: desc.market_name || desc.name,
+                        type: desc.type || 'Unknown',
+                        weapon: desc.tags?.find(t => t.category === 'Weapon')?.localized_tag_name || 
+                                desc.tags?.find(t => t.category === 'Type')?.localized_tag_name || 'Other',
+                        rarity: desc.tags?.find(t => t.category === 'Rarity')?.localized_tag_name || 'Normal',
+                        rarity_color: desc.name_color ? '#' + desc.name_color : '#b0b0b0',
+                        wear: desc.tags?.find(t => t.category === 'Exterior')?.localized_tag_name || 'N/A',
+                        float_value: floatValue ? parseFloat(floatValue) : null,
+                        image_url: desc.icon_url ? `https://community.cloudflare.steamstatic.com/economy/image/${desc.icon_url}` : null,
+                        inspect_link: inspectLink,
+                        tradable: true,
+                        price: null // Será preenchido depois
+                    };
+
+                    tradableItems.push(item);
+                }
+
+                if (tradableItems.length === 0) {
+                    throw new Error('Nenhum item trocável encontrado');
+                }
+
+                showAdminStatus(`⏳ Salvando ${tradableItems.length} itens no banco...`, '');
+
+                // Limpar inventário antigo
+                const { error: deleteError } = await supabaseClient
+                    .from('inventory_items')
+                    .delete()
+                    .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta todos
+
+                if (deleteError) {
+                    console.error('Erro ao limpar:', deleteError);
+                }
+
+                // Inserir novos itens
+                const { data: insertedData, error: insertError } = await supabaseClient
+                    .from('inventory_items')
+                    .insert(tradableItems);
+
+                if (insertError) {
+                    throw new Error(`Erro ao salvar no banco: ${insertError.message}`);
+                }
+
+                showAdminStatus(`✅ ${tradableItems.length} itens salvos com sucesso!`, 'success');
+                
+                setTimeout(() => {
+                    closeAdmin();
+                    loadPublicInventory();
+                }, 1500);
+
+            } catch (err) {
+                console.error('Erro:', err);
+                showAdminStatus(`❌ Erro: ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function showAdminStatus(message, type) {
+            const status = document.getElementById('adminStatus');
+            status.textContent = message;
+            status.style.display = 'block';
+            status.className = 'admin-status';
+            if (type === 'success') status.classList.add('status-success');
+            if (type === 'error') status.classList.add('status-error');
+        }
+
+        // Carregar inventário do Supabase
+        async function loadPublicInventory() {
+            try {
+                console.log('📡 Carregando inventário do Supabase...');
+
+                const { data: items, error } = await supabaseClient
+                    .from('inventory_items')
+                    .select('*')
+                    .eq('tradable', true)
+                    .order('name', { ascending: true });
+
+                if (error) {
+                    console.error('Erro Supabase:', error);
+                    throw error;
+                }
+
+                if (!items || items.length === 0) {
+                    console.log('⚠️ Nenhum item no banco');
+                    document.getElementById('emptyState').style.display = 'block';
+                    document.getElementById('navbar').style.display = 'none';
+                    document.getElementById('statsBar').style.display = 'none';
+                    return;
+                }
+
+                console.log(`✅ ${items.length} itens carregados do banco`);
+
+                allItems = items;
+
+                // Mostrar UI
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('navbar').style.display = 'block';
+                document.getElementById('statsBar').style.display = 'flex';
+
+                // Popular filtro de armas
+                const weapons = [...new Set(items.map(item => item.weapon))].sort();
+                const weaponFilter = document.getElementById('weaponFilter');
+                weaponFilter.innerHTML = '<option value="">Todas</option>';
+                weapons.forEach(weapon => {
+                    weaponFilter.innerHTML += `<option value="${weapon}">${weapon}</option>`;
+                });
+
+                // Atualizar stats
+                document.getElementById('totalItems').textContent = items.length;
+                document.getElementById('tradableItems').textContent = items.length;
+
+                // Aplicar filtros
+                applyFilters();
+
+            } catch (err) {
+                console.error('❌ Erro ao carregar inventário:', err);
+                document.getElementById('emptyState').style.display = 'block';
+            }
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const weaponFilter = document.getElementById('weaponFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            // Filtrar
+            filteredItems = allItems.filter(item => {
+                const matchSearch = item.name.toLowerCase().includes(search);
+                const matchWeapon = !weaponFilter || item.weapon === weaponFilter;
+                return matchSearch && matchWeapon;
+            });
+
+            // Ordenar
+            filteredItems.sort((a, b) => {
+                switch(sortBy) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'float':
+                        const floatA = parseFloat(a.float_value) || 999;
+                        const floatB = parseFloat(b.float_value) || 999;
+                        return floatA - floatB;
+                    case 'price':
+                        const priceA = parseFloat(a.price) || 999999;
+                        const priceB = parseFloat(b.price) || 999999;
+                        return priceA - priceB;
+                    case 'rarity':
+                        return b.rarity_color.localeCompare(a.rarity_color);
+                    default:
+                        return 0;
+                }
+            });
+
+            document.getElementById('filteredItems').textContent = filteredItems.length;
+            currentPage = 1;
+            renderPage();
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('weaponFilter').value = '';
+            document.getElementById('sortBy').value = 'name';
+            applyFilters();
+        }
+
+        function renderPage() {
+            const perPage = document.getElementById('itemsPerPage').value;
+            itemsPerPage = perPage === 'all' ? filteredItems.length : parseInt(perPage);
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageItems = filteredItems.slice(start, end);
+
+            displayItems(pageItems);
+            renderPagination();
+        }
+
+        function displayItems(items) {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = '';
+
+            const whatsapp = localStorage.getItem(WHATSAPP_KEY) || '5511999999999';
+
+            items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.style.animationDelay = `${index * 0.05}s`;
+
+                // Corrigir inspect link
+                let inspectBtn = '';
+                if (item.inspect_link) {
+                    const link = item.inspect_link
+                        .replace('%owner_steamid%', '')
+                        .replace('%assetid%', item.asset_id);
+                    
+                    // Usar steam:// protocol
+                    inspectBtn = `<a href="steam://rungame/730/76561202255233023/+csgo_econ_action_preview ${link}" class="btn btn-inspect">🔍 Inspecionar</a>`;
+                }
+
+                const whatsappMsg = encodeURIComponent(`Olá! Tenho interesse na skin: ${item.name}`);
+                const whatsappLink = `https://wa.me/${whatsapp}?text=${whatsappMsg}`;
+
+                const priceDisplay = item.price ? `R$ ${parseFloat(item.price).toFixed(2)}` : 'Consultar preço';
+
+                card.innerHTML = `
+                    <div class="tradable-badge">✓ Trocável</div>
+                    <img src="${item.image_url}" alt="${item.name}" class="item-image" loading="lazy">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-rarity" style="background-color: ${item.rarity_color}">${item.rarity}</div>
+                    <div class="item-price">${priceDisplay}</div>
+                    <div class="item-info">
+                        <div class="info-row">
+                            <span class="info-label">Arma:</span>
+                            <span class="info-value">${item.weapon}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Condição:</span>
+                            <span class="info-value">${item.wear}</span>
+                        </div>
+                        ${item.float_value ? `
+                        <div class="info-row">
+                            <span class="info-label">Float:</span>
+                            <span class="float-value">${parseFloat(item.float_value).toFixed(6)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="item-actions">
+                        ${inspectBtn}
+                        <a href="${whatsappLink}" target="_blank" class="btn btn-whatsapp">
+                            💬 Entrar em Contato
+                        </a>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+            pagination.innerHTML = '';
+
+            // Botão anterior
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.textContent = '←';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => {
+                currentPage--;
+                renderPage();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            pagination.appendChild(prevBtn);
+
+            // Páginas
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => {
+                        currentPage = i;
+                        renderPage();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    };
+                    pagination.appendChild(pageBtn);
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.style.padding = '10px';
+                    pagination.appendChild(dots);
+                }
+            }
+
+            // Botão próximo
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.textContent = '→';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => {
+                currentPage++;
+                renderPage();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            pagination.appendChild(nextBtn);
+        }
+
+        // Event listeners
+        document.getElementById('itemsPerPage').addEventListener('change', renderPage);
+
+        // Carregar ao iniciar
+        console.log('🚀 Iniciando aplicação...');
+        loadPublicInventory();
+
+        // Auto-refresh a cada 30 segundos
+        setInterval(loadPublicInventory, 30000);
+    </script>
+</body>
+</html>
 
         // Admin functions
         function openAdmin() {
