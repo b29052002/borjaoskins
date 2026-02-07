@@ -295,6 +295,8 @@
             filter: drop-shadow(0 10px 30px var(--purple-glow));
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             pointer-events: none; /* Impede que o vídeo interfira no clique */
+            background: transparent; /* Remove fundo preto */
+            object-fit: contain; /* Mantém proporção sem cortar */
         }
 
         .link-btn:hover {
@@ -491,7 +493,7 @@
         </div>
 
         <div class="footer">
-            Desenvolvido por hive.mkt com 💖
+            Desenvolvido por hive.mkt 
         </div>
     </div>
 
