@@ -10,9 +10,9 @@ exports.handler = async (event) => {
   }
 
   const inspectLink = event.queryStringParameters?.url;
-  
+
   console.log('📥 Inspect link:', inspectLink);
-  
+
   if (!inspectLink) {
     return {
       statusCode: 400,
@@ -22,53 +22,38 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Extrair float do D-value no inspect link
-    // Formato: steam://rungame/730/.../+csgo_econ_action_preview S{owner}A{asset}D{float_encoded}
-    const dMatch = inspectLink.match(/D(\d+)/);
-    
-    if (!dMatch) {
-      console.log('⚠️ Nenhum D-value encontrado');
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: false,
-          float: null,
-          error: 'No D-value found in link'
-        })
-      };
-    }
+    // Chamada real para API de inspect
+    const apiUrl = `https://api.csfloat.com/?url=${encodeURIComponent(inspectLink)}`;
 
-    const dValue = dMatch[1];
-    console.log('🔍 D-value:', dValue);
+    const response = await fetch(apiUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0'
+      }
+    });
 
-    // Converter D-value para float
-    // Float = D-value / (2^64 - 1)
-    // Aproximação: D-value / 10^16
-    const floatValue = parseFloat(dValue) / 10000000000000000;
-    
-    console.log('🎯 Float:', floatValue);
+    const data = await response.json();
+
+    console.log('📦 CSFloat response:', data);
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        float: floatValue,
-        method: 'd_value'
+        float: data?.iteminfo?.floatvalue || null
       })
     };
 
   } catch (error) {
     console.error('💥 Erro:', error.message);
-    
+
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ 
-        error: error.message,
+      body: JSON.stringify({
+        success: false,
         float: null,
-        success: false
+        error: error.message
       })
     };
   }
