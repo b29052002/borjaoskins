@@ -822,6 +822,79 @@
                     </div>
                 </section>
 
+                <!-- FINANCEIRO -->
+                <section class="content-section" id="section-financeiro">
+                    <div class="section-header">
+                        <h2 class="section-title">💰 Painel Financeiro</h2>
+                        <p class="section-subtitle">Controle completo de gastos e receitas</p>
+                    </div>
+
+                    <!-- Cards Resumo -->
+                    <div class="cards-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📈</div>
+                            <div class="stat-value" id="finTotalEntradas" style="color: #00cc00;">R$ 0</div>
+                            <div class="stat-label">Entradas (Vendas)</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">📉</div>
+                            <div class="stat-value" id="finTotalSaidas" style="color: #ff6b6b;">R$ 0</div>
+                            <div class="stat-label">Saídas (Gastos)</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">💵</div>
+                            <div class="stat-value" id="finLucro">R$ 0</div>
+                            <div class="stat-label">Lucro Líquido</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-value" id="finMargem">0%</div>
+                            <div class="stat-label">Margem</div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros e Ações -->
+                    <div style="display: flex; gap: 15px; margin: 30px 0; flex-wrap: wrap; align-items: center;">
+                        <button class="btn btn-primary" onclick="openAdicionarGastoModal()">
+                            ➕ Adicionar Gasto
+                        </button>
+
+                        <select id="finMesFiltro" class="form-input" style="width: auto; min-width: 150px;" onchange="loadFinanceiroData()">
+                            <!-- Será preenchido dinamicamente -->
+                        </select>
+
+                        <button class="btn btn-secondary" onclick="exportarFinanceiro()">
+                            📊 Exportar Planilha
+                        </button>
+                    </div>
+
+                    <!-- Tabela de Gastos -->
+                    <div class="data-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th>Categoria</th>
+                                    <th>Valor</th>
+                                    <th>Método</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="finGastosTable">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
+                                        ⏳ Carregando gastos...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
                 <!-- Outras seções... -->
             </main>
         </div>
@@ -916,6 +989,69 @@
             <div id="gerenciarRifaConteudo">
                 <!-- Conteúdo do painel de gerenciamento será carregado aqui -->
             </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL ADICIONAR GASTO ===== -->
+    <div class="modal" id="gastoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="gastoModalTitle">💸 Adicionar Gasto</h3>
+                <button class="modal-close" onclick="closeGastoModal()">✕</button>
+            </div>
+
+            <form id="gastoForm" onsubmit="saveGasto(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">📅 Data</label>
+                        <input type="date" class="form-input" id="gastoData" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">🏷️ Categoria</label>
+                        <select class="form-input" id="gastoCategoria" required>
+                            <option value="">Selecione...</option>
+                            <option value="Compra de Skin">💎 Compra de Skin</option>
+                            <option value="Publicidade">📢 Publicidade</option>
+                            <option value="Prêmio">🎁 Prêmio</option>
+                            <option value="Taxas">💳 Taxas</option>
+                            <option value="Ferramentas">🔧 Ferramentas</option>
+                            <option value="Outro">📦 Outro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-full">
+                        <label class="form-label">📝 Descrição</label>
+                        <input type="text" class="form-input" id="gastoDescricao" placeholder="Ex: Compra M4A4 Howl FT" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">💵 Valor (R$)</label>
+                        <input type="number" class="form-input" id="gastoValor" step="0.01" min="0.01" placeholder="0.00" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">💳 Método de Pagamento</label>
+                        <select class="form-input" id="gastoMetodo" required>
+                            <option value="">Selecione...</option>
+                            <option value="PIX">🔵 PIX</option>
+                            <option value="Cartão">💳 Cartão</option>
+                            <option value="Dinheiro">💵 Dinheiro</option>
+                            <option value="Transferência">🏦 Transferência</option>
+                            <option value="Outro">📦 Outro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        💾 Salvar Gasto
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeGastoModal()">
+                        ❌ Cancelar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1067,14 +1203,44 @@
         // ===== FUNÇÕES PLACEHOLDER (SERÃO IMPLEMENTADAS) =====
         async function loadRifasData() {
             try {
-                const { data: rifas, error } = await supabaseClient
+                // Buscar rifas
+                const { data: rifas, error: rifasError } = await supabaseClient
                     .from('raffles')
                     .select('*')
                     .order('created_at', { ascending: false });
 
-                if (error) throw error;
+                if (rifasError) throw rifasError;
 
-                renderRifasCards(rifas || []);
+                // Buscar vendas de todas as rifas
+                const { data: allSales, error: salesError } = await supabaseClient
+                    .from('raffle_sales')
+                    .select('raffle_id, numbers, total_amount, payment_status');
+
+                if (salesError) throw salesError;
+
+                // Mapear vendas por rifa
+                const salesByRaffle = {};
+                (allSales || []).forEach(sale => {
+                    if (sale.payment_status === 'approved') {
+                        if (!salesByRaffle[sale.raffle_id]) {
+                            salesByRaffle[sale.raffle_id] = {
+                                sold: 0,
+                                revenue: 0,
+                                buyers: new Set()
+                            };
+                        }
+                        salesByRaffle[sale.raffle_id].sold += sale.numbers?.length || 0;
+                        salesByRaffle[sale.raffle_id].revenue += parseFloat(sale.total_amount || 0);
+                    }
+                });
+
+                // Adicionar dados de vendas às rifas
+                const rifasComVendas = (rifas || []).map(rifa => ({
+                    ...rifa,
+                    vendas: salesByRaffle[rifa.id] || { sold: 0, revenue: 0, buyers: new Set() }
+                }));
+
+                renderRifasCards(rifasComVendas);
 
             } catch (error) {
                 console.error('Erro ao carregar rifas:', error);
@@ -1110,10 +1276,11 @@
         function createRifaCard(rifa) {
             const card = document.createElement('div');
             
-            // Calcular números vendidos
-            const sold = rifa.sold_numbers?.length || 0;
+            // Calcular números vendidos (dos dados reais)
+            const sold = rifa.vendas?.sold || 0;
             const total = rifa.total_numbers || 100;
-            const progress = (sold / total * 100).toFixed(1);
+            const progress = total > 0 ? (sold / total * 100).toFixed(1) : 0;
+            const revenue = rifa.vendas?.revenue || 0;
 
             // Determinar status
             let statusClass = '';
@@ -1136,7 +1303,9 @@
                 statusText = '🏁 Finalizada';
             }
 
-            card.className = `rifa-card ${!rifa.active && !rifa.scheduled_start ? 'finalizada' : ''}`;
+            const isFinished = !rifa.active && !rifa.scheduled_start;
+
+            card.className = `rifa-card ${isFinished ? 'finalizada' : ''}`;
             card.onclick = () => openGerenciarRifaModal(rifa);
             
             card.innerHTML = `
@@ -1152,7 +1321,7 @@
                     
                     <div class="rifa-card-info">
                         <span>📊 ${sold} vendidos</span>
-                        <span>💵 R$ ${(sold * rifa.price_per_number).toFixed(0)}</span>
+                        <span>💵 R$ ${revenue.toFixed(0)}</span>
                     </div>
                     
                     ${rifa.scheduled_start ? `
@@ -1324,33 +1493,44 @@
         }
 
         // ===== MODAL GERENCIAR RIFA =====
-        function openGerenciarRifaModal(rifa) {
+        async function openGerenciarRifaModal(rifa) {
             document.getElementById('gerenciarRifaTitulo').textContent = `🎰 ${rifa.title}`;
+            
+            // Buscar vendas desta rifa
+            const { data: sales } = await supabaseClient
+                .from('raffle_sales')
+                .select('*')
+                .eq('raffle_id', rifa.id)
+                .eq('payment_status', 'approved');
+
+            const totalSold = sales?.reduce((sum, s) => sum + (s.numbers?.length || 0), 0) || 0;
+            const totalRevenue = sales?.reduce((sum, s) => sum + parseFloat(s.total_amount || 0), 0) || 0;
+            const uniqueBuyers = new Set(sales?.map(s => s.buyer_phone)).size || 0;
             
             const conteudo = document.getElementById('gerenciarRifaConteudo');
             conteudo.innerHTML = `
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
                     <div class="stat-card">
                         <div class="stat-icon">🎯</div>
-                        <div class="stat-value">${rifa.sold_numbers?.length || 0}/${rifa.total_numbers}</div>
+                        <div class="stat-value">${totalSold}/${rifa.total_numbers}</div>
                         <div class="stat-label">Números Vendidos</div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon">💰</div>
-                        <div class="stat-value">R$ ${((rifa.sold_numbers?.length || 0) * rifa.price_per_number).toFixed(0)}</div>
+                        <div class="stat-value">R$ ${totalRevenue.toFixed(0)}</div>
                         <div class="stat-label">Arrecadado</div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon">👥</div>
-                        <div class="stat-value">-</div>
+                        <div class="stat-value">${uniqueBuyers}</div>
                         <div class="stat-label">Compradores</div>
                     </div>
                 </div>
 
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-                    <button class="btn btn-primary" onclick="openRifaModal(${JSON.stringify(rifa).replace(/"/g, '&quot;')})">
+                    <button class="btn btn-primary" onclick='openRifaModal(${JSON.stringify(rifa)})'>
                         ✏️ Editar Rifa
                     </button>
                     
@@ -1366,14 +1546,14 @@
                         🎲 Sortear Vencedor
                     </button>
                     
-                    <button class="btn btn-danger" onclick="deleteRifa('${rifa.id}', '${rifa.title}')">
+                    <button class="btn btn-danger" onclick="deleteRifa('${rifa.id}', '${rifa.title.replace(/'/g, "\\'")}')">
                         🗑️ Deletar
                     </button>
                 </div>
 
                 <div class="data-table">
                     <p style="padding: 20px; text-align: center; color: rgba(255,255,255,0.5);">
-                        ℹ️ Tabela de vendas será implementada aqui
+                        ℹ️ ${sales?.length || 0} venda(s) aprovada(s)
                     </p>
                 </div>
             `;
@@ -1405,11 +1585,22 @@
         }
 
         async function deleteRifa(rifaId, rifaTitulo) {
-            if (!confirm(`❌ Tem certeza que deseja DELETAR a rifa "${rifaTitulo}"?\n\nEsta ação NÃO pode ser desfeita!`)) {
+            const confirmText = prompt(
+                `⚠️ ATENÇÃO! Você está prestes a DELETAR PERMANENTEMENTE a rifa:\n\n"${rifaTitulo}"\n\n` +
+                `Esta ação irá:\n` +
+                `- Remover a rifa do banco de dados\n` +
+                `- MANTER as vendas (histórico)\n` +
+                `- NÃO pode ser desfeita\n\n` +
+                `Digite "DELETAR" para confirmar:`
+            );
+
+            if (confirmText !== 'DELETAR') {
+                alert('❌ Operação cancelada.');
                 return;
             }
 
             try {
+                // Deletar rifa
                 const { error } = await supabaseClient
                     .from('raffles')
                     .delete()
@@ -1417,7 +1608,7 @@
 
                 if (error) throw error;
 
-                alert('✅ Rifa deletada com sucesso!');
+                alert('✅ Rifa deletada com sucesso do banco de dados!');
                 closeGerenciarRifaModal();
                 loadRifasData();
 
@@ -1443,8 +1634,211 @@
             console.log('Carregando ranking...');
         }
 
-        function loadFinanceiroData() {
-            console.log('Carregando financeiro...');
+        async function loadFinanceiroData() {
+            try {
+                // Pegar mês selecionado
+                const mesFiltro = document.getElementById('finMesFiltro')?.value || 'todos';
+                
+                // Buscar vendas aprovadas (entradas)
+                const { data: sales, error: salesError } = await supabaseClient
+                    .from('raffle_sales')
+                    .select('total_amount, created_at')
+                    .eq('payment_status', 'approved');
+
+                if (salesError) throw salesError;
+
+                // Buscar gastos (saídas)
+                const { data: gastos, error: gastosError } = await supabaseClient
+                    .from('financeiro_gastos')
+                    .select('*')
+                    .order('data', { ascending: false });
+
+                // Se tabela não existe, criar mensagem
+                if (gastosError && gastosError.code === '42P01') {
+                    document.getElementById('finGastosTable').innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px;">
+                                <p style="color: var(--purple); margin-bottom: 15px;">
+                                    ⚠️ Tabela financeiro_gastos não existe
+                                </p>
+                                <p style="color: rgba(255,255,255,0.5); font-size: 14px;">
+                                    Execute o SQL de criação da tabela
+                                </p>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                // Filtrar por mês se necessário
+                let salesFiltered = sales || [];
+                let gastosFiltered = gastos || [];
+
+                if (mesFiltro !== 'todos') {
+                    const [ano, mes] = mesFiltro.split('-');
+                    salesFiltered = salesFiltered.filter(s => {
+                        const date = new Date(s.created_at);
+                        return date.getFullYear() == ano && (date.getMonth() + 1) == mes;
+                    });
+                    gastosFiltered = gastosFiltered.filter(g => {
+                        const date = new Date(g.data);
+                        return date.getFullYear() == ano && (date.getMonth() + 1) == mes;
+                    });
+                }
+
+                // Calcular totais
+                const totalEntradas = salesFiltered.reduce((sum, s) => sum + parseFloat(s.total_amount || 0), 0);
+                const totalSaidas = gastosFiltered.reduce((sum, g) => sum + parseFloat(g.valor || 0), 0);
+                const lucro = totalEntradas - totalSaidas;
+                const margem = totalEntradas > 0 ? (lucro / totalEntradas * 100) : 0;
+
+                // Atualizar cards
+                document.getElementById('finTotalEntradas').textContent = `R$ ${totalEntradas.toFixed(2)}`;
+                document.getElementById('finTotalSaidas').textContent = `R$ ${totalSaidas.toFixed(2)}`;
+                document.getElementById('finLucro').textContent = `R$ ${lucro.toFixed(2)}`;
+                document.getElementById('finLucro').style.color = lucro >= 0 ? '#00cc00' : '#ff6b6b';
+                document.getElementById('finMargem').textContent = `${margem.toFixed(1)}%`;
+                document.getElementById('finMargem').style.color = margem >= 0 ? '#00cc00' : '#ff6b6b';
+
+                // Popular tabela de gastos
+                const tbody = document.getElementById('finGastosTable');
+                if (!gastosFiltered || gastosFiltered.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
+                                📝 Nenhum gasto registrado neste período
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = gastosFiltered.map(gasto => `
+                        <tr>
+                            <td>${new Date(gasto.data).toLocaleDateString('pt-BR')}</td>
+                            <td>${gasto.descricao}</td>
+                            <td>${gasto.categoria}</td>
+                            <td style="color: #ff6b6b; font-weight: 600;">R$ ${parseFloat(gasto.valor).toFixed(2)}</td>
+                            <td>${gasto.metodo_pagamento}</td>
+                            <td>
+                                <button class="btn btn-danger" onclick="deleteGasto('${gasto.id}')" style="padding: 4px 10px; font-size: 12px;">
+                                    🗑️
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Popular filtro de mês
+                popularFiltroMes(sales, gastos);
+
+            } catch (error) {
+                console.error('Erro ao carregar financeiro:', error);
+                document.getElementById('finGastosTable').innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #ff6b6b;">
+                            ❌ Erro ao carregar dados: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function popularFiltroMes(sales, gastos) {
+            const select = document.getElementById('finMesFiltro');
+            const currentValue = select.value;
+            
+            // Pegar todos os meses únicos
+            const meses = new Set();
+            (sales || []).forEach(s => {
+                const date = new Date(s.created_at);
+                meses.add(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+            });
+            (gastos || []).forEach(g => {
+                const date = new Date(g.data);
+                meses.add(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+            });
+
+            const mesesArray = Array.from(meses).sort().reverse();
+
+            select.innerHTML = '<option value="todos">📅 Todos os períodos</option>';
+            mesesArray.forEach(mes => {
+                const [ano, mesNum] = mes.split('-');
+                const nomeMes = new Date(ano, parseInt(mesNum) - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                select.innerHTML += `<option value="${mes}">${nomeMes}</option>`;
+            });
+
+            select.value = currentValue || 'todos';
+        }
+
+        // ===== MODAL ADICIONAR GASTO =====
+        let currentGastoId = null;
+
+        function openAdicionarGastoModal() {
+            currentGastoId = null;
+            document.getElementById('gastoForm').reset();
+            document.getElementById('gastoData').valueAsDate = new Date();
+            document.getElementById('gastoModal').classList.add('active');
+        }
+
+        function closeGastoModal() {
+            document.getElementById('gastoModal').classList.remove('active');
+        }
+
+        async function saveGasto(event) {
+            event.preventDefault();
+
+            try {
+                const gastoData = {
+                    data: document.getElementById('gastoData').value,
+                    descricao: document.getElementById('gastoDescricao').value,
+                    categoria: document.getElementById('gastoCategoria').value,
+                    valor: parseFloat(document.getElementById('gastoValor').value),
+                    metodo_pagamento: document.getElementById('gastoMetodo').value
+                };
+
+                const { error } = await supabaseClient
+                    .from('financeiro_gastos')
+                    .insert(gastoData);
+
+                if (error) throw error;
+
+                alert('✅ Gasto registrado com sucesso!');
+                closeGastoModal();
+                loadFinanceiroData();
+
+            } catch (error) {
+                console.error('Erro ao salvar gasto:', error);
+                if (error.code === '42P01') {
+                    alert('❌ Tabela financeiro_gastos não existe!\n\nExecute o SQL de criação primeiro.');
+                } else {
+                    alert('❌ Erro ao salvar: ' + error.message);
+                }
+            }
+        }
+
+        async function deleteGasto(gastoId) {
+            if (!confirm('❌ Tem certeza que deseja deletar este gasto?')) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('financeiro_gastos')
+                    .delete()
+                    .eq('id', gastoId);
+
+                if (error) throw error;
+
+                alert('✅ Gasto deletado!');
+                loadFinanceiroData();
+
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('❌ Erro ao deletar: ' + error.message);
+            }
+        }
+
+        function exportarFinanceiro() {
+            alert('📊 Exportação de planilha será implementada!');
         }
 
         function loadAnalyticsData() {
