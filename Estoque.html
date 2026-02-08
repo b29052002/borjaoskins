@@ -790,7 +790,13 @@
                 view.setBigUint64(0, bigIntValue, true); // true = little-endian
                 
                 // Ler como float de 64 bits (double)
-                const floatValue = view.getFloat64(0, true);
+                let floatValue = view.getFloat64(0, true);
+                
+                // Validar: float de skins CS2 está sempre entre 0 e 1
+                if (floatValue < 0 || floatValue > 1 || isNaN(floatValue) || !isFinite(floatValue)) {
+                    console.warn('Float inválido:', floatValue, 'D-value:', d);
+                    return null;
+                }
                 
                 return floatValue;
             } catch (err) {
