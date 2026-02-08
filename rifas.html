@@ -285,6 +285,131 @@
         }
 
         .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid;
+        }
+
+        /* 🏆 RANKING STYLES */
+        .ranking-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(148, 49, 206, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease backwards;
+        }
+
+        .ranking-item:hover {
+            background: rgba(148, 49, 206, 0.1);
+            border-color: var(--purple);
+            transform: translateX(5px);
+        }
+
+        .ranking-item:nth-child(1) {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+            border-color: #FFD700;
+            animation-delay: 0.1s;
+        }
+
+        .ranking-item:nth-child(2) {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(192, 192, 192, 0.05));
+            border-color: #C0C0C0;
+            animation-delay: 0.2s;
+        }
+
+        .ranking-item:nth-child(3) {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.05));
+            border-color: #CD7F32;
+            animation-delay: 0.3s;
+        }
+
+        .ranking-position {
+            font-family: 'Orbitron', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .ranking-item:nth-child(1) .ranking-position { color: #FFD700; }
+        .ranking-item:nth-child(2) .ranking-position { color: #C0C0C0; }
+        .ranking-item:nth-child(3) .ranking-position { color: #CD7F32; }
+
+        .ranking-medal {
+            font-size: 28px;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 3px;
+        }
+
+        .ranking-numbers {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .ranking-points {
+            text-align: right;
+        }
+
+        .ranking-points-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--purple);
+        }
+
+        .ranking-points-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Empty state */
+        .ranking-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .ranking-empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .legend-box {
             width: 20px;
             height: 20px;
             border-radius: 4px;
@@ -1126,8 +1251,97 @@
                 }
 
                 document.getElementById('soldCount').textContent = soldNumbers.size;
+                
+                // 🏆 Atualizar ranking após carregar números
+                await loadRanking();
+                
             } catch (error) {
                 console.error('Erro ao carregar números vendidos:', error);
+            }
+        }
+
+        // 🏆 CARREGAR RANKING DE COMPRADORES
+        async function loadRanking() {
+            if (!currentRaffle || !currentRaffle.id) return;
+
+            try {
+                // Buscar todas as vendas aprovadas
+                const { data, error } = await supabaseClient
+                    .from('raffle_sales')
+                    .select('buyer_name, numbers')
+                    .eq('raffle_id', currentRaffle.id)
+                    .eq('payment_status', 'approved');
+
+                if (error) throw error;
+
+                const rankingContainer = document.getElementById('rankingContainer');
+                const rankingSection = document.getElementById('rankingSection');
+
+                if (!data || data.length === 0) {
+                    rankingSection.style.display = 'none';
+                    return;
+                }
+
+                // Agrupar por comprador e contar pontos
+                const buyers = {};
+                
+                data.forEach(sale => {
+                    const firstName = sale.buyer_name.split(' ')[0]; // Apenas primeiro nome
+                    const points = sale.numbers.length; // 1 ponto por número
+                    
+                    if (buyers[firstName]) {
+                        buyers[firstName].points += points;
+                        buyers[firstName].numbers = buyers[firstName].numbers.concat(sale.numbers);
+                    } else {
+                        buyers[firstName] = {
+                            name: firstName,
+                            points: points,
+                            numbers: [...sale.numbers]
+                        };
+                    }
+                });
+
+                // Converter para array e ordenar por pontos
+                const ranking = Object.values(buyers)
+                    .sort((a, b) => b.points - a.points)
+                    .slice(0, 10); // Top 10
+
+                // Mostrar ranking apenas se tiver compradores
+                if (ranking.length > 0) {
+                    rankingSection.style.display = 'block';
+                } else {
+                    rankingSection.style.display = 'none';
+                    return;
+                }
+
+                // Renderizar ranking
+                rankingContainer.innerHTML = '';
+                
+                ranking.forEach((buyer, index) => {
+                    const position = index + 1;
+                    const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'ranking-item';
+                    item.style.animationDelay = `${index * 0.1}s`;
+                    
+                    item.innerHTML = `
+                        ${medal ? `<div class="ranking-medal">${medal}</div>` : `<div class="ranking-position">${position}º</div>`}
+                        <div class="ranking-info">
+                            <div class="ranking-name">${buyer.name}</div>
+                            <div class="ranking-numbers">${buyer.numbers.length} número(s)</div>
+                        </div>
+                        <div class="ranking-points">
+                            <div class="ranking-points-value">${buyer.points}</div>
+                            <div class="ranking-points-label">pontos</div>
+                        </div>
+                    `;
+                    
+                    rankingContainer.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar ranking:', error);
             }
         }
 
@@ -1515,14 +1729,6 @@
             }, 15000); // Verificar a cada 15 segundos
         }
 
-        // Simular pagamento (REMOVER EM PRODUÇÃO - apenas para testes)
-        function simulatePayment(saleId) {
-            alert('🔄 Sistema de pagamento em desenvolvimento.\n\nEm produção, aqui geraria o QR Code PIX do Mercado Pago.');
-            selectedNumbers.clear();
-            updateNumbersDisplay();
-            updateCheckout();
-        }
-
         // ADMIN FUNCTIONS
 
         function openAdminPanel() {
@@ -1762,16 +1968,19 @@
                     return;
                 }
 
-                // Criar mapa: número → primeiro nome
+                // Criar mapa: número → nome e sobrenome
                 const numberToName = {};
                 
                 data.forEach(sale => {
-                    // Pegar apenas o primeiro nome
-                    const firstName = sale.buyer_name.split(' ')[0];
+                    // Pegar nome e sobrenome (primeiras 2 palavras)
+                    const nameParts = sale.buyer_name.split(' ');
+                    const firstName = nameParts[0] || '';
+                    const lastName = nameParts[1] || '';
+                    const shortName = lastName ? `${firstName} ${lastName}` : firstName;
                     
                     // Para cada número comprado, associar ao nome
                     sale.numbers.forEach(num => {
-                        numberToName[num] = firstName;
+                        numberToName[num] = shortName;
                     });
                 });
 
@@ -1780,7 +1989,7 @@
                     .map(n => parseInt(n))
                     .sort((a, b) => a - b);
 
-                // Gerar conteúdo TXT no formato: 1-Nome, 2-Nome
+                // Gerar conteúdo TXT no formato: 1-Nome Sobrenome, 2-Nome Sobrenome
                 let txtContent = `LISTA DE NÚMEROS - ${currentRaffle.title}\n`;
                 txtContent += `Data de Exportação: ${new Date().toLocaleString('pt-BR')}\n`;
                 txtContent += `Total de Números Vendidos: ${sortedNumbers.length}\n`;
@@ -1794,8 +2003,13 @@
                 txtContent += `RESUMO DE COMPRADORES:\n\n`;
 
                 data.forEach((sale, index) => {
-                    const firstName = sale.buyer_name.split(' ')[0];
-                    txtContent += `${firstName}: ${sale.numbers.length} número(s) - ${sale.numbers.sort((a, b) => a - b).join(', ')}\n`;
+                    // Nome e sobrenome no resumo também
+                    const nameParts = sale.buyer_name.split(' ');
+                    const firstName = nameParts[0] || '';
+                    const lastName = nameParts[1] || '';
+                    const shortName = lastName ? `${firstName} ${lastName}` : firstName;
+                    
+                    txtContent += `${shortName}: ${sale.numbers.length} número(s) - ${sale.numbers.sort((a, b) => a - b).join(', ')}\n`;
                 });
 
                 // Download do arquivo
