@@ -1,5 +1,3 @@
-const https = require('https');
-
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -13,69 +11,46 @@ exports.handler = async (event) => {
   
   const inspectLink = event.queryStringParameters?.url;
   
+  console.log('📥 Inspect link recebido:', inspectLink);
+  
   if (!inspectLink) {
     return {
       statusCode: 400,
       headers,
-      body: JSON.stringify({ error: 'Inspect link obrigatório' })
+      body: JSON.stringify({ error: 'Inspect link obrigatório', float: null })
     };
   }
   
   try {
-    // Extrair S, A, D, M do inspect link
-    // Formato: steam://rungame/730/76561202255233023/+csgo_econ_action_preview S{owner}A{asset}D{inspect}M{listing}
-    const sMatch = inspectLink.match(/S(\d+)/);
-    const aMatch = inspectLink.match(/A(\d+)/);
-    const dMatch = inspectLink.match(/D(\d+)/);
-    const mMatch = inspectLink.match(/M(\d+)/);
+    // Decodificar URL (caso venha com %20 ou %2520)
+    const decodedLink = decodeURIComponent(inspectLink);
+    console.log('🔓 Link decodificado:', decodedLink);
     
-    if (!sMatch || !aMatch || !dMatch) {
+    // Extrair D-value do inspect link
+    // Formato: steam://rungame/730/.../+csgo_econ_action_preview S{owner}A{asset}D{float}
+    const dMatch = decodedLink.match(/D(\d+)/);
+    
+    if (!dMatch) {
+      console.log('⚠️ D-value não encontrado no link');
       return {
-        statusCode: 400,
+        statusCode: 200,
         headers,
         body: JSON.stringify({ 
-          error: 'Inspect link inválido',
-          float: null
+          success: false,
+          error: 'D-value não encontrado',
+          float: null 
         })
       };
     }
     
-    const s = sMatch[1];
-    const a = aMatch[1];
-    const d = dMatch[1];
-    const m = mMatch ? mMatch[1] : '0';
+    const dValue = dMatch[1];
+    console.log('🔍 D-value encontrado:', dValue);
     
-    console.log(`Buscando float: S=${s} A=${a} D=${d} M=${m}`);
+    // Converter D-value para float
+    // Float = D-value / (2^64 - 1) ≈ D-value / 10^16
+    const floatValue = parseFloat(dValue) / 10000000000000000;
     
-    // Chamar API PriceEmpire
-    const apiUrl = `https://api.pricempire.com/v3/inspect?S=${s}&A=${a}&D=${d}&M=${m}`;
-    
-    const data = await new Promise((resolve, reject) => {
-      https.get(apiUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0',
-          'Accept': 'application/json'
-        }
-      }, (res) => {
-        let body = '';
-        
-        res.on('data', chunk => body += chunk);
-        
-        res.on('end', () => {
-          try {
-            const parsed = JSON.parse(body);
-            resolve(parsed);
-          } catch (e) {
-            reject(new Error('Resposta inválida da API'));
-          }
-        });
-      }).on('error', reject);
-    });
-    
-    console.log('PriceEmpire response:', data);
-    
-    // Extrair float da resposta
-    const floatValue = data?.floatvalue || data?.float || data?.wear || null;
+    console.log('🎯 Float calculado:', floatValue);
     
     return {
       statusCode: 200,
@@ -83,12 +58,13 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         success: true,
         float: floatValue,
-        data: data
+        method: 'd_value',
+        d_value: dValue
       })
     };
     
   } catch (error) {
-    console.error('Erro:', error.message);
+    console.error('💥 Erro:', error.message);
     
     return {
       statusCode: 500,
