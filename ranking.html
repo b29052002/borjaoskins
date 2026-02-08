@@ -614,6 +614,7 @@
                 <input type="text" id="newName" placeholder="Nome completo" style="width: 200px;">
                 <input type="text" id="newPhone" placeholder="Telefone (11999999999)" style="width: 150px;">
                 <input type="number" id="newPoints" placeholder="Pontos" style="width: 100px;">
+                <input type="number" id="newNumbers" placeholder="Cotas" style="width: 100px;">
                 <button class="btn-add" onclick="addPlayer()">Adicionar</button>
             </div>
 
@@ -819,7 +820,9 @@
                         <td>
                             <input type="number" value="${Math.round(player.total_points)}" id="points_${player.id}" style="width: 80px;" />
                         </td>
-                        <td>${player.total_numbers || 0}</td>
+                        <td>
+                            <input type="number" value="${player.total_numbers || 0}" id="numbers_${player.id}" style="width: 80px;" />
+                        </td>
                         <td>
                             <button class="btn-save" onclick="savePlayer('${player.id}')">💾 Salvar</button>
                             <button class="btn-delete" onclick="deletePlayer('${player.id}', '${player.buyer_name}')">🗑️ Deletar</button>
@@ -839,8 +842,9 @@
                 const name = document.getElementById(`name_${id}`).value;
                 const phone = document.getElementById(`phone_${id}`).value;
                 const points = parseFloat(document.getElementById(`points_${id}`).value);
+                const numbers = parseInt(document.getElementById(`numbers_${id}`).value);
 
-                if (!name || !phone || isNaN(points)) {
+                if (!name || !phone || isNaN(points) || isNaN(numbers)) {
                     alert('❌ Preencha todos os campos corretamente!');
                     return;
                 }
@@ -851,6 +855,7 @@
                         buyer_name: name,
                         buyer_phone: phone,
                         total_points: points,
+                        total_numbers: numbers, // ✅ Agora atualiza cotas também
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', id);
@@ -895,9 +900,10 @@
                 const name = document.getElementById('newName').value;
                 const phone = document.getElementById('newPhone').value;
                 const points = parseFloat(document.getElementById('newPoints').value);
+                const numbers = parseInt(document.getElementById('newNumbers').value) || 0;
 
                 if (!name || !phone || isNaN(points)) {
-                    alert('❌ Preencha todos os campos corretamente!');
+                    alert('❌ Preencha nome, telefone e pontos!');
                     return;
                 }
 
@@ -920,7 +926,7 @@
                         buyer_phone: phone,
                         total_points: points,
                         total_purchases: 0,
-                        total_numbers: 0,
+                        total_numbers: numbers, // ✅ Incluir cotas
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     });
@@ -933,6 +939,7 @@
                 document.getElementById('newName').value = '';
                 document.getElementById('newPhone').value = '';
                 document.getElementById('newPoints').value = '';
+                document.getElementById('newNumbers').value = '';
 
                 loadAdminData();
                 loadRanking(); // Atualizar ranking principal
