@@ -65,17 +65,46 @@ exports.handler = async (event) => {
     
     console.log(`📊 Parâmetros: S=${s}, A=${a}, D=${d}, M=${m}`);
     
-    // Usar API CSGOFloat (gratuita e funciona sem key)
-    const apiUrl = `https://api.csgofloat.com/?url=${encodeURIComponent(decodedLink)}`;
-    console.log('🌐 Chamando CSGOFloat API');
+    // API Key do PriceEmpire
+    const apiKey = process.env.PRICEMPIRE_API_KEY;
+    console.log('🔑 API Key configurada:', !!apiKey);
+    
+    if (!apiKey) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: 'PRICEMPIRE_API_KEY não configurada. Configure em: Site Settings > Environment Variables',
+          float: null
+        })
+      };
+    }
+    
+    // Endpoint correto: POST /api/v2/inspect
+    const apiUrl = 'api.pricempire.com';
+    const path = '/api/v2/inspect';
+    
+    console.log(`🌐 Chamando PriceEmpire: https://${apiUrl}${path}`);
+    
+    const postData = JSON.stringify({
+      inspect_link: decodedLink
+    });
     
     const data = await new Promise((resolve, reject) => {
-      https.get(apiUrl, {
+      const options = {
+        hostname: apiUrl,
+        path: path,
+        method: 'POST',
         headers: {
-          'User-Agent': 'Mozilla/5.0',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData),
+          'x-api-key': apiKey,
+          'User-Agent': 'Mozilla/5.0'
         }
-      }, (res) => {
+      };
+      
+      const req = https.request(options, (res) => {
         let body = '';
         
         console.log('📡 Status:', res.statusCode);
@@ -83,7 +112,17 @@ exports.handler = async (event) => {
         res.on('data', chunk => body += chunk);
         
         res.on('end', () => {
-          console.log('📄 Response (200 chars):', body.substring(0, 200));
+          console.log('📄 Response (500 chars):', body.substring(0, 500));
+          
+          if (res.statusCode === 401) {
+            reject(new Error('API Key inválida. Verifique sua PRICEMPIRE_API_KEY'));
+            return;
+          }
+          
+          if (res.statusCode === 429) {
+            reject(new Error('Rate limit excedido. Aguarde alguns minutos'));
+            return;
+          }
           
           if (res.statusCode !== 200) {
             reject(new Error(`API retornou status ${res.statusCode}: ${body}`));
@@ -94,22 +133,33 @@ exports.handler = async (event) => {
             const parsed = JSON.parse(body);
             resolve(parsed);
           } catch (e) {
-            console.error('❌ JSON inválido');
+            console.error('❌ JSON inválido:', e.message);
             reject(new Error('Resposta não é JSON válido'));
           }
         });
-      }).on('error', (err) => {
-        console.error('❌ Erro HTTP:', err.message);
+      });
+      
+      req.on('error', (err) => {
+        console.error('❌ Erro na requisição:', err.message);
         reject(err);
       });
+      
+      req.write(postData);
+      req.end();
     });
     
-    console.log('✅ Dados recebidos');
+    console.log('✅ Dados recebidos da PriceEmpire');
     
     // Extrair float da resposta
-    const floatValue = data?.iteminfo?.floatvalue || data?.floatvalue || data?.float || null;
+    // A resposta pode vir em diferentes formatos, tentamos todos
+    const floatValue = data?.float_value || 
+                       data?.floatvalue || 
+                       data?.paintwear || 
+                       data?.wear || 
+                       data?.iteminfo?.floatvalue ||
+                       null;
     
-    console.log('🎯 Float:', floatValue);
+    console.log('🎯 Float extraído:', floatValue);
     
     return {
       statusCode: 200,
