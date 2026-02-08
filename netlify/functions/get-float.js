@@ -66,7 +66,7 @@ exports.handler = async (event) => {
     console.log(`📊 Parâmetros: S=${s}, A=${a}, D=${d}, M=${m}`);
     
     // API Key do PriceEmpire
-    const apiKey = process.env.PRICEMPIRE_API_KEY;
+    const apiKey = 'ecf6cc14-827a-4819-822a-f05a785ffff5'; // ← Cole aqui
     console.log('🔑 API Key configurada:', !!apiKey);
     
     if (!apiKey) {
