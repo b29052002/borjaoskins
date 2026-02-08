@@ -27,7 +27,7 @@ exports.handler = async (event) => {
     // Decodificar URL
     const decodedLink = decodeURIComponent(inspectLink);
     console.log('🔓 Link decodificado:', decodedLink);
-    
+    const apiKey = 'ecf6cc14-827a-4819-822a-f05a785ffff5';
     // Extrair parâmetros S, A, D, M
     const sMatch = decodedLink.match(/S(\d+)/);
     const aMatch = decodedLink.match(/A(\d+)/);
