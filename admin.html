@@ -581,9 +581,184 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Será implementado nas próximas partes
-        // Este é um projeto MUITO grande!
-        // Dividindo em partes para não exceder limite
+        // ===== CONFIGURAÇÃO =====
+        const supabaseClient = supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.key);
+
+        // ===== LOGIN =====
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Verificar credenciais
+            const user = CONFIG.admin.users.find(u => 
+                u.username === username && u.password === password
+            );
+
+            if (user) {
+                // Login bem-sucedido
+                localStorage.setItem('adminUser', JSON.stringify(user));
+                document.getElementById('loginError').style.display = 'none';
+                
+                // Mostrar dashboard
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminDashboard').classList.add('active');
+                document.getElementById('adminUserName').textContent = `👤 ${user.username}`;
+
+                // Carregar dados do dashboard
+                loadDashboardData();
+            } else {
+                // Login falhou
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('password').value = '';
+            }
+        }
+
+        // ===== LOGOUT =====
+        function handleLogout() {
+            if (confirm('Deseja realmente sair do painel admin?')) {
+                localStorage.removeItem('adminUser');
+                location.reload();
+            }
+        }
+
+        // ===== NAVEGAÇÃO ENTRE SEÇÕES =====
+        function showSection(sectionName) {
+            // Remover active de todas as seções
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remover active de todos os itens do menu
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Ativar seção selecionada
+            const targetSection = document.getElementById('section-' + sectionName);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Ativar item do menu
+            event.target.closest('.sidebar-item').classList.add('active');
+
+            // Carregar dados da seção
+            switch(sectionName) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'rifas':
+                    loadRifasData();
+                    break;
+                case 'estoque':
+                    loadEstoqueData();
+                    break;
+                case 'ranking':
+                    loadRankingData();
+                    break;
+                case 'financeiro':
+                    loadFinanceiroData();
+                    break;
+                case 'analytics':
+                    loadAnalyticsData();
+                    break;
+                case 'config':
+                    loadConfigData();
+                    break;
+            }
+        }
+
+        // ===== CARREGAR DADOS DO DASHBOARD =====
+        async function loadDashboardData() {
+            try {
+                // Total de rifas ativas
+                const { data: rifas, error: rifasError } = await supabaseClient
+                    .from('raffles')
+                    .select('*')
+                    .eq('active', true);
+
+                if (!rifasError) {
+                    document.getElementById('totalRifas').textContent = rifas?.length || 0;
+                }
+
+                // Total vendido
+                const { data: sales, error: salesError } = await supabaseClient
+                    .from('raffle_sales')
+                    .select('total_amount')
+                    .eq('payment_status', 'approved');
+
+                if (!salesError) {
+                    const total = sales?.reduce((sum, s) => sum + parseFloat(s.total_amount || 0), 0) || 0;
+                    document.getElementById('totalVendido').textContent = `R$ ${total.toFixed(0)}`;
+                }
+
+                // Total de competidores
+                const { data: ranking, error: rankingError } = await supabaseClient
+                    .from('ranking_points')
+                    .select('id');
+
+                if (!rankingError) {
+                    document.getElementById('totalCompetidores').textContent = ranking?.length || 0;
+                }
+
+                // Total de estoque (se tabela existir)
+                const { data: skins, error: skinsError } = await supabaseClient
+                    .from('skins')
+                    .select('id');
+
+                if (!skinsError) {
+                    document.getElementById('totalEstoque').textContent = skins?.length || 0;
+                } else {
+                    document.getElementById('totalEstoque').textContent = '-';
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+            }
+        }
+
+        // ===== FUNÇÕES PLACEHOLDER (SERÃO IMPLEMENTADAS) =====
+        function loadRifasData() {
+            console.log('Carregando rifas...');
+        }
+
+        function loadEstoqueData() {
+            console.log('Carregando estoque...');
+        }
+
+        function loadRankingData() {
+            console.log('Carregando ranking...');
+        }
+
+        function loadFinanceiroData() {
+            console.log('Carregando financeiro...');
+        }
+
+        function loadAnalyticsData() {
+            console.log('Carregando analytics...');
+        }
+
+        function loadConfigData() {
+            console.log('Carregando configurações...');
+        }
+
+        // ===== VERIFICAR SE JÁ ESTÁ LOGADO =====
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('adminUser');
+            
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                
+                // Já está logado, mostrar dashboard direto
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminDashboard').classList.add('active');
+                document.getElementById('adminUserName').textContent = `👤 ${user.username}`;
+                
+                loadDashboardData();
+            }
+        });
     </script>
 </body>
 </html>
