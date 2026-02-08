@@ -836,6 +836,10 @@
                     
                     const floatValue = fullInspectLink ? await getFloat(fullInspectLink) : null;
 
+                    if (fullInspectLink) {
+                    await new Promise(resolve => setTimeout(resolve, 2000)); 
+                    }
+
                     tradableItems.push({
                         asset_id: asset.assetid,
                         class_id: asset.classid,
