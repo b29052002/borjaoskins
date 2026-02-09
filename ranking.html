@@ -644,12 +644,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        const SUPABASE_URL = window.ENV?.SUPABASE_URL || process.env.SUPABASE_URL;
-        const SUPABASE_KEY = window.ENV?.SUPABASE_KEY || process.env.SUPABASE_KEY;
+        const SUPABASE_URL = window.ENV?.SUPABASE_URL;
+        const SUPABASE_KEY = window.ENV?.SUPABASE_KEY;
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const ADMIN_PASSWORD_HASH = window.ENV?.ADMIN_HASH || process.env.ADMIN_HASH;
+        const ADMIN_PASSWORD_HASH = window.ENV?.ADMIN_HASH;
 
         async function hashPassword(password) {
             const msgBuffer = new TextEncoder().encode(password);
