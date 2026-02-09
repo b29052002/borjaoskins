@@ -640,12 +640,17 @@
         ⚙️
     </button>
 
-    <!-- Supabase -->
+    <script>
+        window.ENV = {
+            SUPABASE_URL: '{{ SUPABASE_URL }}',
+            SUPABASE_KEY: '{{ SUPABASE_KEY }}',
+            ADMIN_HASH: '{{ ADMIN_HASH }}'
+        };
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        window.ENV = window.ENV || {};
-        
         const SUPABASE_URL = window.ENV.SUPABASE_URL;
         const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
         
