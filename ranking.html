@@ -80,260 +80,286 @@
   </style>
 </head>
 <body>
-  <div class="bg-animation"></div>
-  <div class="grid-overlay"></div>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
 
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <a href="index.html" style="text-decoration:none;">
-        <div class="logo"><img src="images/logodb.png" alt="Logo Borjão Skins"></div>
-      </a>
-      <h1 class="title">🏆 RANKING</h1>
-      <p class="subtitle">RANKING GERAL DE TODOS OS TEMPOS</p>
-    </div>
-
-    <!-- Ranking Header -->
-    <div class="ranking-header">
-      <div class="ranking-info">
-        <div class="info-box">
-          <div class="info-value" id="totalCompetitors">-</div>
-          <div class="info-label">Competidores</div>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo">
+                    <img src="images/logodb.png" alt="Logo Borjão Skins">
+                </div>
+            </a>
+            <h1 class="title">🏆 RANKING</h1>
+            <p class="subtitle">RANKING GERAL DE TODOS OS TEMPOS</p>
         </div>
-        <div class="info-box">
-          <div class="info-value" id="totalNumbers">-</div>
-          <div class="info-label">Números Vendidos</div>
+
+        <!-- Ranking Header -->
+        <div class="ranking-header">
+            <div class="ranking-info">
+                <div class="info-box">
+                    <div class="info-value" id="totalCompetitors">-</div>
+                    <div class="info-label">Competidores</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-value" id="totalNumbers">-</div>
+                    <div class="info-label">Números Vendidos</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-value" id="totalPoints">-</div>
+                    <div class="info-label">Pontos Totais</div>
+                </div>
+            </div>
         </div>
-        <div class="info-box">
-          <div class="info-value" id="totalPoints">-</div>
-          <div class="info-label">Pontos Totais</div>
+
+        <!-- Loading -->
+        <div id="loadingMessage" class="loading">
+            ⏳ Carregando ranking...
         </div>
-      </div>
+
+        <!-- Ranking -->
+        <div class="ranking-container" id="rankingContainer" style="display: none;">
+            <!-- Preenchido via JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="ranking-empty" style="display: none;">
+            <div class="ranking-empty-icon">📊</div>
+            <h3 style="margin-bottom: 10px;">Nenhum comprador ainda</h3>
+            <p>Seja o primeiro a aparecer no ranking!</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin-bottom: 15px;">⚡ Atualizado em tempo real</p>
+            <a href="rifas.html" class="back-button">← Voltar para a Rifa</a>
+            <p style="margin-top: 20px; font-size: 11px;">
+                © 2024 Borjão Skins - Todos os direitos reservados
+            </p>
+        </div>
     </div>
 
-    <!-- Loading -->
-    <div id="loadingMessage" class="loading">⏳ Carregando ranking...</div>
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h2 class="admin-title">⚙️ Painel Admin - Ranking</h2>
+                <button class="close-btn" onclick="closeAdminPanel()">✕ Fechar</button>
+            </div>
 
-    <!-- Ranking -->
-    <div class="ranking-container" id="rankingContainer" style="display:none;"></div>
+            <!-- Add New Player -->
+            <div class="add-form">
+                <h3 style="color: var(--purple); margin-bottom: 15px;">➕ Adicionar Novo Jogador</h3>
+                <input type="text" id="newName" placeholder="Nome completo" style="width: 200px;">
+                <input type="text" id="newPhone" placeholder="Telefone (11999999999)" style="width: 150px;">
+                <input type="number" id="newPoints" placeholder="Pontos" style="width: 100px;">
+                <input type="number" id="newNumbers" placeholder="Cotas" style="width: 100px;">
+                <button class="btn-add" onclick="addPlayer()">Adicionar</button>
+            </div>
 
-    <!-- Empty -->
-    <div id="emptyState" class="ranking-empty" style="display:none;">
-      <div class="ranking-empty-icon">📊</div>
-      <h3 style="margin-bottom:10px;">Nenhum comprador ainda</h3>
-      <p>Seja o primeiro a aparecer no ranking!</p>
+            <!-- Players Table -->
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nome</th>
+                            <th>Telefone</th>
+                            <th>Pontos</th>
+                            <th>Cotas</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Carregando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- Footer -->
-    <div class="footer">
-      <p style="margin-bottom:15px;">⚡ Atualizado em tempo real</p>
-      <a href="rifas.html" class="back-button">← Voltar para a Rifa</a>
-      <p style="margin-top:20px; font-size:11px;">© 2024 Borjão Skins - Todos os direitos reservados</p>
-    </div>
-  </div>
+    <!-- Botão Admin Discreto -->
+    <button class="admin-btn" onclick="openAdminPanel()" title="Admin">⚙️</button>
 
-  <!-- Admin Panel -->
-  <div class="admin-panel" id="adminPanel">
-    <div class="admin-container">
-      <div class="admin-header">
-        <h2 class="admin-title">⚙️ Painel Admin - Ranking</h2>
-        <button class="close-btn" onclick="closeAdminPanel()">✕ Fechar</button>
-      </div>
+    <script>
+        const API_BASE = '/.netlify/functions'; // Base para suas funções serverless
 
-      <div class="add-form">
-        <h3 style="color:var(--purple);margin-bottom:15px;">➕ Adicionar Novo Jogador</h3>
-        <input type="text" id="newName" placeholder="Nome completo" style="width:200px;">
-        <input type="text" id="newPhone" placeholder="Telefone (11999999999)" style="width:150px;">
-        <input type="number" id="newPoints" placeholder="Pontos" style="width:100px;">
-        <input type="number" id="newNumbers" placeholder="Cotas" style="width:100px;">
-        <button class="btn-add" onclick="addPlayer()">Adicionar</button>
-      </div>
+        async function loadRanking() {
+            try {
+                const res = await fetch(`${API_BASE}/get-ranking`);
+                if (!res.ok) throw new Error('Erro ao carregar ranking');
+                const ranking = await res.json();
 
-      <div style="overflow-x:auto;">
-        <table class="admin-table">
-          <thead>
-            <tr><th>#</th><th>Nome</th><th>Telefone</th><th>Pontos</th><th>Cotas</th><th>Ações</th></tr>
-          </thead>
-          <tbody id="adminTableBody"><tr><td colspan="6" style="text-align:center;">Carregando...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+                if (!ranking || ranking.length === 0) {
+                    showEmpty('Nenhum comprador ainda. Seja o primeiro!');
+                    return;
+                }
 
-  <button class="admin-btn" onclick="openAdminPanel()" title="Admin">⚙️</button>
+                const totalCompetitors = ranking.length;
+                const totalPoints = ranking.reduce((sum, r) => sum + parseFloat(r.total_points || 0), 0);
+                const totalNumbers = ranking.reduce((sum, r) => sum + parseInt(r.total_numbers || 0), 0);
 
-  <script>
-    // ==== FRONT-END COM FUNÇÕES SERVERLESS ====
-    
-    async function loadRanking() {
-      try {
-        const res = await fetch('/.netlify/functions/get-ranking');
-        const ranking = await res.json();
+                document.getElementById('totalCompetitors').textContent = totalCompetitors;
+                document.getElementById('totalNumbers').textContent = totalNumbers;
+                document.getElementById('totalPoints').textContent = Math.round(totalPoints);
 
-        if (!ranking || ranking.length === 0) {
-          showEmpty('Nenhum comprador ainda. Seja o primeiro!');
-          return;
+                const container = document.getElementById('rankingContainer');
+                container.innerHTML = '';
+
+                ranking.forEach((buyer, index) => {
+                    const position = index + 1;
+                    const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '';
+                    const nameParts = (buyer.buyer_name || 'Anônimo').split(' ');
+                    const fullName = nameParts.slice(0, 2).join(' ');
+
+                    const item = document.createElement('div');
+                    item.className = 'ranking-item';
+                    item.style.animationDelay = `${index * 0.1}s`;
+                    if (position > 16) item.classList.add('ranking-item-inactive');
+
+                    item.innerHTML = `
+                        ${medal ? `<div class="ranking-medal">${medal}</div>` : `<div class="ranking-position">${position}º</div>`}
+                        <div class="ranking-info-box">
+                            <div class="ranking-name">${fullName}</div>
+                            <div class="ranking-numbers">${buyer.total_numbers || 0} cota(s)</div>
+                        </div>
+                        <div class="ranking-points">
+                            <div class="ranking-points-value">${Math.round(buyer.total_points || 0)}</div>
+                            <div class="ranking-points-label">pontos</div>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+
+                document.getElementById('loadingMessage').style.display = 'none';
+                container.style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                showEmpty('Erro ao carregar ranking. Veja o console (F12).');
+            }
         }
 
-        document.getElementById('loadingMessage').style.display = 'none';
-        const container = document.getElementById('rankingContainer');
-        container.style.display = 'block';
-        container.innerHTML = '';
+        function showEmpty(message) {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('rankingContainer').style.display = 'none';
+            const emptyState = document.getElementById('emptyState');
+            emptyState.querySelector('p').textContent = message;
+            emptyState.style.display = 'block';
+        }
 
-        const totalCompetitors = ranking.length;
-        const totalPoints = ranking.reduce((sum,r)=>sum+parseFloat(r.total_points||0),0);
-        const totalNumbers = ranking.reduce((sum,r)=>sum+parseInt(r.total_numbers||0),0);
+        // Atualizar a cada 10s
+        loadRanking();
+        setInterval(loadRanking, 10000);
 
-        document.getElementById('totalCompetitors').textContent = totalCompetitors;
-        document.getElementById('totalPoints').textContent = Math.round(totalPoints);
-        document.getElementById('totalNumbers').textContent = totalNumbers;
+        // ===== ADMIN PANEL =====
+        async function openAdminPanel() {
+            const password = prompt('🔐 Digite a senha do administrador:');
+            if (!password) return;
 
-        ranking.forEach((buyer,index)=>{
-          const position=index+1;
-          const medal=position===1?'🥇':position===2?'🥈':position===3?'🥉':'';
-          const nameParts=(buyer.buyer_name||'Anônimo').split(' ');
-          const firstName=nameParts[0]||'Anônimo';
-          const lastName=nameParts[1]||'';
-          const fullName=lastName?`${firstName} ${lastName}`:firstName;
-          const points=Math.round(parseFloat(buyer.total_points||0));
-          const totalNumbers=parseInt(buyer.total_numbers||0);
+            const res = await fetch(`${API_BASE}/admin-login`, {
+                method: 'POST',
+                body: JSON.stringify({ password }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (!data.success) return alert('❌ Senha incorreta!');
 
-          const item=document.createElement('div');
-          item.className='ranking-item';
-          item.style.animationDelay=`${index*0.1}s`;
-          if(position>16)item.classList.add('ranking-item-inactive');
-          item.innerHTML=`
-            ${medal?`<div class="ranking-medal">${medal}</div>`:`<div class="ranking-position">${position}º</div>`}
-            <div class="ranking-info-box">
-              <div class="ranking-name">${fullName}</div>
-              <div class="ranking-numbers">${totalNumbers} cota(s)</div>
-            </div>
-            <div class="ranking-points">
-              <div class="ranking-points-value">${points}</div>
-              <div class="ranking-points-label">pontos</div>
-            </div>
-          `;
-          container.appendChild(item);
-        });
+            document.getElementById('adminPanel').classList.add('active');
+            loadAdminData();
+        }
 
-      } catch(err) {
-        console.error(err);
-        showEmpty('Erro ao carregar ranking. Veja console (F12).');
-      }
-    }
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('active');
+        }
 
-    function showEmpty(message){
-      document.getElementById('loadingMessage').style.display='none';
-      document.getElementById('rankingContainer').style.display='none';
-      const emptyState=document.getElementById('emptyState');
-      emptyState.querySelector('p').textContent=message;
-      emptyState.style.display='block';
-    }
+        async function loadAdminData() {
+            const res = await fetch(`${API_BASE}/get-ranking`);
+            const data = await res.json();
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum jogador no ranking</td></tr>';
+                return;
+            }
+            data.forEach((player, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index+1}º</td>
+                    <td><input type="text" value="${player.buyer_name}" id="name_${player.id}" /></td>
+                    <td><input type="text" value="${player.buyer_phone}" id="phone_${player.id}" /></td>
+                    <td><input type="number" value="${Math.round(player.total_points)}" id="points_${player.id}" style="width: 80px;" /></td>
+                    <td><input type="number" value="${player.total_numbers || 0}" id="numbers_${player.id}" style="width: 80px;" /></td>
+                    <td>
+                        <button class="btn-save" onclick="savePlayer('${player.id}')">💾 Salvar</button>
+                        <button class="btn-delete" onclick="deletePlayer('${player.id}', '${player.buyer_name}')">🗑️ Deletar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
 
-    loadRanking();
-    setInterval(loadRanking,10000);
+        async function addPlayer() {
+            const name = document.getElementById('newName').value;
+            const phone = document.getElementById('newPhone').value;
+            const points = parseFloat(document.getElementById('newPoints').value);
+            const numbers = parseInt(document.getElementById('newNumbers').value) || 0;
 
-    // ===== ADMIN PANEL =====
-    async function openAdminPanel(){
-      const password=prompt('🔐 Digite a senha do administrador:');
-      if(!password)return;
-      try{
-        const res=await fetch('/.netlify/functions/admin-login',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({password})
-        });
-        const data=await res.json();
-        if(!data.success){ alert('❌ Senha incorreta!'); return; }
-        document.getElementById('adminPanel').classList.add('active');
-        loadAdminData();
-      }catch(err){
-        console.error(err);
-        alert('Erro ao autenticar admin. Veja console (F12).');
-      }
-    }
+            if (!name || !phone || isNaN(points)) return alert('❌ Preencha nome, telefone e pontos!');
 
-    function closeAdminPanel(){ document.getElementById('adminPanel').classList.remove('active'); }
+            const res = await fetch(`${API_BASE}/add-player`, {
+                method: 'POST',
+                body: JSON.stringify({ buyer_name: name, buyer_phone: phone, total_points: points, total_numbers: numbers }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (!data.success) return alert('❌ Erro ao adicionar: ' + data.error);
 
-    async function loadAdminData(){
-      const tbody=document.getElementById('adminTableBody');
-      tbody.innerHTML='<tr><td colspan="6" style="text-align:center;">Carregando...</td></tr>';
-      try{
-        const res=await fetch('/.netlify/functions/get-ranking');
-        const ranking=await res.json();
-        if(!ranking || ranking.length===0){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;">Sem dados</td></tr>'; return; }
-        tbody.innerHTML='';
-        ranking.forEach((r,i)=>{
-          const tr=document.createElement('tr');
-          tr.innerHTML=`
-            <td>${i+1}</td>
-            <td><input value="${r.buyer_name||''}" onchange="updateField('${r.id}','buyer_name',this.value)"></td>
-            <td><input value="${r.buyer_phone||''}" onchange="updateField('${r.id}','buyer_phone',this.value)"></td>
-            <td><input type="number" value="${r.total_points||0}" onchange="updateField('${r.id}','total_points',this.value)"></td>
-            <td><input type="number" value="${r.total_numbers||0}" onchange="updateField('${r.id}','total_numbers',this.value)"></td>
-            <td>
-              <button class="btn-save" onclick="updatePlayer('${r.id}')">💾 Salvar</button>
-              <button class="btn-delete" onclick="deletePlayer('${r.id}')">🗑️ Excluir</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }catch(err){ console.error(err); tbody.innerHTML='<tr><td colspan="6" style="text-align:center;">Erro ao carregar</td></tr>'; }
-    }
+            alert('✅ Jogador adicionado!');
+            document.getElementById('newName').value = '';
+            document.getElementById('newPhone').value = '';
+            document.getElementById('newPoints').value = '';
+            document.getElementById('newNumbers').value = '';
 
-    async function updateField(id,field,value){
-      // apenas armazena localmente, salvar com botão
-      if(!window.adminEdits)window.adminEdits={};
-      if(!window.adminEdits[id])window.adminEdits[id]={};
-      window.adminEdits[id][field]=value;
-    }
+            loadAdminData();
+            loadRanking();
+        }
 
-    async function updatePlayer(id){
-      if(!window.adminEdits || !window.adminEdits[id])return alert('Nenhuma alteração.');
-      try{
-        const res=await fetch('/.netlify/functions/update-player',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({id,data:window.adminEdits[id]})
-        });
-        const data=await res.json();
-        if(data.success){ alert('✅ Atualizado!'); delete window.adminEdits[id]; loadAdminData(); }
-        else alert('❌ Erro ao atualizar');
-      }catch(err){ console.error(err); alert('Erro ao atualizar. Veja console.'); }
-    }
+        async function savePlayer(id) {
+            const name = document.getElementById(`name_${id}`).value;
+            const phone = document.getElementById(`phone_${id}`).value;
+            const points = parseFloat(document.getElementById(`points_${id}`).value);
+            const numbers = parseInt(document.getElementById(`numbers_${id}`).value);
 
-    async function deletePlayer(id){
-      if(!confirm('Tem certeza que deseja excluir este jogador?')) return;
-      try{
-        const res=await fetch('/.netlify/functions/delete-player',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({id})
-        });
-        const data=await res.json();
-        if(data.success){ alert('✅ Excluído'); loadAdminData(); }
-        else alert('❌ Erro ao excluir');
-      }catch(err){ console.error(err); alert('Erro ao excluir. Veja console.'); }
-    }
+            const res = await fetch(`${API_BASE}/update-player`, {
+                method: 'POST',
+                body: JSON.stringify({ id, data: { buyer_name: name, buyer_phone: phone, total_points: points, total_numbers: numbers } }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (!data.success) return alert('❌ Erro ao salvar: ' + data.error);
 
-    async function addPlayer(){
-      const name=document.getElementById('newName').value.trim();
-      const phone=document.getElementById('newPhone').value.trim();
-      const points=parseInt(document.getElementById('newPoints').value)||0;
-      const numbers=parseInt(document.getElementById('newNumbers').value)||0;
-      if(!name || !phone){ return alert('Preencha nome e telefone'); }
-      try{
-        const res=await fetch('/.netlify/functions/add-player',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({buyer_name:name,buyer_phone:phone,total_points:points,total_numbers:numbers})
-        });
-        const data=await res.json();
-        if(data.success){ alert('✅ Jogador adicionado'); document.getElementById('newName').value=''; document.getElementById('newPhone').value=''; document.getElementById('newPoints').value=''; document.getElementById('newNumbers').value=''; loadAdminData(); }
-        else alert('❌ Erro ao adicionar');
-      }catch(err){ console.error(err); alert('Erro ao adicionar. Veja console.'); }
-    }
+            alert('✅ Jogador atualizado!');
+            loadAdminData();
+            loadRanking();
+        }
 
-  </script>
+        async function deletePlayer(id, name) {
+            if (!confirm(`❌ Deletar "${name}"?`)) return;
+            const res = await fetch(`${API_BASE}/delete-player`, {
+                method: 'POST',
+                body: JSON.stringify({ id }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (!data.success) return alert('❌ Erro ao deletar: ' + data.error);
+
+            alert('✅ Jogador deletado!');
+            loadAdminData();
+            loadRanking();
+        }
+    </script>
 </body>
 </html>
