@@ -10,16 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        @font-face {
-            font-family: 'Kenyan Coffee';
-            src: url('fonts/KENYAN_COFFEE_RG.TTF') format('truetype');
-        }
-
-        @font-face {
-            font-family: 'Orbitron';
-            src: url('fonts/Orbitron-VariableFont_wght.ttf') format('truetype');
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -93,7 +83,7 @@
         }
 
         .title {
-            font-family: 'Kenyan Coffee', sans-serif;
+            font-family: 'Orbitron', sans-serif;
             font-size: 48px;
             color: var(--purple);
             margin-bottom: 10px;
@@ -433,7 +423,7 @@
         }
 
         .admin-title {
-            font-family: 'Kenyan Coffee', sans-serif;
+            font-family: 'Orbitron', sans-serif;
             font-size: 32px;
             color: var(--purple);
         }
@@ -654,12 +644,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        const SUPABASE_URL = window.ENV?.SUPABASE_URL || process.env.SUPABASE_URL;
-        const SUPABASE_KEY = window.ENV?.SUPABASE_KEY || process.env.SUPABASE_KEY;
+        window.ENV = window.ENV || {};
+        
+        const SUPABASE_URL = window.ENV.SUPABASE_URL;
+        const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const ADMIN_PASSWORD_HASH = window.ENV?.ADMIN_HASH || process.env.ADMIN_HASH;
+        const ADMIN_PASSWORD_HASH = window.ENV.ADMIN_HASH;
 
         async function hashPassword(password) {
             const msgBuffer = new TextEncoder().encode(password);
