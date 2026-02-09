@@ -544,7 +544,7 @@
     <div class="grid-overlay"></div>
 
     <div class="container">
-        <!-- Header -->
+       
         <div class="header">
             <a href="index.html" style="text-decoration: none;">
                 <div class="logo">
@@ -555,7 +555,7 @@
             <p class="subtitle">RANKING GERAL DE TODOS OS TEMPOS</p>
         </div>
 
-        <!-- Ranking Header -->
+       
         <div class="ranking-header">
             <div class="ranking-info">
                 <div class="info-box">
@@ -573,34 +573,34 @@
             </div>
         </div>
 
-        <!-- Loading -->
+       
         <div id="loadingMessage" class="loading">
             ⏳ Carregando ranking...
         </div>
 
         <!-- Ranking -->
         <div class="ranking-container" id="rankingContainer" style="display: none;">
-            <!-- Preenchido via JavaScript -->
+            
         </div>
 
-        <!-- Empty State -->
+        
         <div id="emptyState" class="ranking-empty" style="display: none;">
             <div class="ranking-empty-icon">📊</div>
             <h3 style="margin-bottom: 10px;">Nenhum comprador ainda</h3>
             <p>Seja o primeiro a aparecer no ranking!</p>
         </div>
 
-        <!-- Footer -->
+        
         <div class="footer">
             <p style="margin-bottom: 15px;">⚡ Atualizado em tempo real</p>
             <a href="rifas.html" class="back-button">← Voltar para a Rifa</a>
             <p style="margin-top: 20px; font-size: 11px;">
-                © 2024 Borjão Skins - Todos os direitos reservados
+                © 2026 Borjão Skins - Todos os direitos reservados
             </p>
         </div>
     </div>
 
-    <!-- Admin Panel -->
+    
     <div class="admin-panel" id="adminPanel">
         <div class="admin-container">
             <div class="admin-header">
@@ -608,7 +608,7 @@
                 <button class="close-btn" onclick="closeAdminPanel()">✕ Fechar</button>
             </div>
 
-            <!-- Add New Player -->
+            
             <div class="add-form">
                 <h3 style="color: var(--purple); margin-bottom: 15px;">➕ Adicionar Novo Jogador</h3>
                 <input type="text" id="newName" placeholder="Nome completo" style="width: 200px;">
@@ -618,7 +618,7 @@
                 <button class="btn-add" onclick="addPlayer()">Adicionar</button>
             </div>
 
-            <!-- Players Table -->
+           
             <div style="overflow-x: auto;">
                 <table class="admin-table">
                     <thead>
@@ -641,27 +641,24 @@
         </div>
     </div>
 
-    <!-- Botão Admin Discreto (engrenagem invisível) -->
+    
     <button class="admin-btn" onclick="openAdminPanel()" title="Admin">
         ⚙️
     </button>
 
-    <!-- Supabase -->
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // ===== CONFIGURAÇÃO SEGURA =====
-        // Credenciais vêm de variáveis de ambiente do Netlify
-        const SUPABASE_URL = window.ENV?.SUPABASE_URL || 'https://yyoyxanloloupwoczkhr.supabase.co';
-        const SUPABASE_KEY = window.ENV?.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM';
+        
+        const SUPABASE_URL = window.ENV?.SUPABASE_URL || ;
+        const SUPABASE_KEY = window.ENV?.SUPABASE_KEY ||;
 
-        // Criar cliente Supabase
+        
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ===== SENHA ADMIN (HASH SEGURO) =====
-        // Hash vem da variável de ambiente ADMIN_HASH
-        // Se não configurada, usa hash de "borjao777" como fallback
-        const ADMIN_PASSWORD_HASH = window.ENV?.ADMIN_HASH || 'a8c5e8a5e0f6b5d8c3e2a4f1b9d7e3c6a2f5b8d1e4c7a9f2b6d3e1c8a5f4b7d2';
+        
+        const ADMIN_PASSWORD_HASH = window.ENV?.ADMIN_HASH ||;
 
         async function hashPassword(password) {
             const msgBuffer = new TextEncoder().encode(password);
@@ -675,7 +672,7 @@
             return hash === ADMIN_PASSWORD_HASH;
         }
 
-        // ===== CARREGAR RANKING =====
+       
         async function loadRanking() {
             console.log('🔵 loadRanking chamada!');
             
@@ -684,13 +681,13 @@
                 console.log('URL:', SUPABASE_URL);
                 console.log('KEY presente:', SUPABASE_KEY ? 'Sim' : 'Não');
                 
-                // Buscar ranking da tabela ranking_points
+               
                 console.log('📊 Buscando dados de ranking_points...');
                 const { data: ranking, error } = await supabaseClient
                     .from('ranking_points')
                     .select('*')
                     .order('total_points', { ascending: false })
-                    .limit(100); // Top 100
+                    .limit(100); /
 
                 console.log('📥 Resposta do Supabase:');
                 console.log('Data:', ranking);
@@ -709,19 +706,19 @@
 
                 console.log(`✅ ${ranking.length} registros encontrados!`);
 
-                // Calcular estatísticas totais
+                
                 const totalCompetitors = ranking.length;
                 const totalPoints = ranking.reduce((sum, r) => sum + parseFloat(r.total_points || 0), 0);
                 const totalNumbers = ranking.reduce((sum, r) => sum + parseInt(r.total_numbers || 0), 0);
 
                 console.log('📊 Estatísticas:', { totalCompetitors, totalPoints, totalNumbers });
 
-                // Atualizar estatísticas
+                
                 document.getElementById('totalCompetitors').textContent = totalCompetitors;
                 document.getElementById('totalNumbers').textContent = totalNumbers;
                 document.getElementById('totalPoints').textContent = Math.round(totalPoints);
 
-                // Renderizar ranking
+                
                 const container = document.getElementById('rankingContainer');
                 container.innerHTML = '';
                 
@@ -729,20 +726,20 @@
                     const position = index + 1;
                     const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '';
                     
-                    // Pegar nome e sobrenome (primeiras 2 palavras)
+                 
                     const nameParts = (buyer.buyer_name || 'Anônimo').split(' ');
                     const firstName = nameParts[0] || 'Anônimo';
                     const lastName = nameParts[1] || '';
                     const fullName = lastName ? `${firstName} ${lastName}` : firstName;
                     
-                    const points = Math.round(parseFloat(buyer.total_points || 0)); // Sem decimais
-                    const totalNumbers = parseInt(buyer.total_numbers || 0); // Total de cotas
+                    const points = Math.round(parseFloat(buyer.total_points || 0)); 
+                    const totalNumbers = parseInt(buyer.total_numbers || 0); 
                     
                     const item = document.createElement('div');
                     item.className = 'ranking-item';
                     item.style.animationDelay = `${index * 0.1}s`;
                     
-                    // Top 16 com borda roxa, resto com borda cinza apagada
+                    /
                     if (position > 16) {
                         item.classList.add('ranking-item-inactive');
                     }
@@ -764,7 +761,7 @@
 
                 console.log('✅ Ranking renderizado com sucesso!');
 
-                // Mostrar ranking
+                
                 document.getElementById('loadingMessage').style.display = 'none';
                 container.style.display = 'block';
 
@@ -784,18 +781,18 @@
             emptyState.style.display = 'block';
         }
 
-        // Carregar ao abrir página
+       
         loadRanking();
 
-        // Atualizar a cada 10 segundos
+      
         setInterval(loadRanking, 10000);
 
-        // ===== ADMIN PANEL =====
+      
         async function openAdminPanel() {
             const password = prompt('🔐 Digite a senha do administrador:');
             if (!password) return;
 
-            // Verificar senha com hash
+         
             const isValid = await verifyAdminPassword(password);
             if (!isValid) {
                 alert('❌ Senha incorreta!');
@@ -875,7 +872,7 @@
                         buyer_name: name,
                         buyer_phone: phone,
                         total_points: points,
-                        total_numbers: numbers, // ✅ Agora atualiza cotas também
+                        total_numbers: numbers, 
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', id);
@@ -884,7 +881,7 @@
 
                 alert('✅ Jogador atualizado com sucesso!');
                 loadAdminData();
-                loadRanking(); // Atualizar ranking principal
+                loadRanking(); 
 
             } catch (error) {
                 console.error('Erro ao salvar:', error);
@@ -927,7 +924,7 @@
                     return;
                 }
 
-                // Verificar se telefone já existe
+
                 const { data: existing } = await supabaseClient
                     .from('ranking_points')
                     .select('id')
@@ -946,7 +943,7 @@
                         buyer_phone: phone,
                         total_points: points,
                         total_purchases: 0,
-                        total_numbers: numbers, // ✅ Incluir cotas
+                        total_numbers: numbers, 
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     });
@@ -962,7 +959,7 @@
                 document.getElementById('newNumbers').value = '';
 
                 loadAdminData();
-                loadRanking(); // Atualizar ranking principal
+                loadRanking(); 
 
             } catch (error) {
                 console.error('Erro ao adicionar:', error);
