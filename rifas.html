@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <script src="/.netlify/functions/env"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
    
@@ -277,19 +278,11 @@
     </div>
 
     <script>
-        // ==========================================
-        // 🔐 CONFIGURAÇÃO DO SUPABASE E MERCADO PAGO
-        // ==========================================
-        const SUPABASE_URL = 'https://yyoyxanloloupwoczkhr.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5b3l4YW5sb2xvdXB3b2N6a2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2ODM2MjYsImV4cCI6MjA4NTI1OTYyNn0.yV9UszxZW0Ee5X6Zj8OLo1Q_uQfj99RJviaZIImiMAM';
-        
-        // MERCADO PAGO - Credenciais de PRODUÇÃO
-        const MERCADOPAGO_PUBLIC_KEY = 'APP_USR-4ed66640-511e-4aea-846b-70499be11156';
-        const CLIENT_EMAIL = 'dproartes@gmail.com';
-        
-        // CONFIGURAÇÃO DE SENHA DO ADMIN:
-        const ADMIN_PASSWORD = 'borjao777';
-        // ==========================================
+       const SUPABASE_URL = window.ENV.SUPABASE_URL;
+       const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
+       const MERCADOPAGO_PUBLIC_KEY = window.ENV.MP_PUBLIC_KEY;
+       const CLIENT_EMAIL = 'dproartes@gmail.com';
+       const ADMIN_PASSWORD_HASH = window.ENV.ADMIN_HASH;
 
         // Inicializar Supabase
         let supabaseClient = null;
