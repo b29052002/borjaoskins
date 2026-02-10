@@ -93,8 +93,8 @@
             <div id="confirmationNumbers" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 40px;">
             </div>
             
-            <div style="background: rgba(148, 49, 206, 0.1); border: 2px solid var(--purple); border-radius: 15px; padding: 20px; margin-bottom: 30px;">
-                <p style="color: var(--purple); font-weight: 600; margin-bottom: 10px;">
+            <div style="background: rgba(0, 255, 136, 0.1); border: 2px solid #00ff88; border-radius: 15px; padding: 20px; margin-bottom: 30px;">
+                <p style="color: #00ff88; font-weight: 600; margin-bottom: 10px;">
                     📸 LEMBRE-SE DE TIRAR UM PRINT DA TELA
                 </p>
                 <p style="font-size: 14px; color: rgba(255,255,255,0.7);">
@@ -102,12 +102,8 @@
                 </p>
             </div>
             
-            <button onclick="proceedToPayment()" style="width: 100%; background: linear-gradient(135deg, var(--purple), #6b1fa0); border: none; color: white; padding: 18px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 18px; margin-bottom: 15px;">
-                💳 Continuar para Pagamento PIX
-            </button>
-            
-            <button onclick="closeConfirmationModal()" style="width: 100%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: 600;">
-                ✕ Fechar
+            <button onclick="closeConfirmationModal()" style="width: 100%; background: linear-gradient(135deg, var(--purple), #6b1fa0); border: none; color: white; padding: 18px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 18px;">
+                ✓ Fechar
             </button>
         </div>
     </div>
@@ -134,11 +130,6 @@
                     <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 15px;">Seus números estão reservados por 15 minutos.<br>Assim que o pagamento for confirmado, você receberá seus números!</p>
                     <button onclick="closePixModal(true)" style="width: 100%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px;">✕ Fechar e Verificar Depois</button>
                 </div>
-            </div>
-            <div id="thankYouMini" style="display: none; text-align: center; padding: 40px;">
-                <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
-                <h3 style="color: #00ff88; font-size: 24px; margin-bottom: 10px;">Pagamento Confirmado!</h3>
-                <p style="font-size: 16px; color: rgba(255,255,255,0.8);">Seus números foram liberados com sucesso!<br>Boa sorte! 🍀</p>
             </div>
         </div>
     </div>
