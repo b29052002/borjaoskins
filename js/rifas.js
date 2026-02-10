@@ -1,12 +1,13 @@
 (function() {
-    const SUPABASE_URL = window.ENV.SUPABASE_URL;
-    const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
-    const MERCADOPAGO_PUBLIC_KEY = window.ENV.MP_PUBLIC_KEY;
+    const SUPABASE_URL = window.ENV?.SUPABASE_URL;
+    const SUPABASE_KEY = window.ENV?.SUPABASE_KEY;
+    const MERCADOPAGO_PUBLIC_KEY = window.ENV?.MP_PUBLIC_KEY;
     const CLIENT_EMAIL = 'dproartes@gmail.com';
-    const ADMIN_PASSWORD_HASH = window.ENV.ADMIN_HASH;
+    const ADMIN_PASSWORD_HASH = window.ENV?.ADMIN_HASH;
     
-    delete window.ENV;
-    Object.freeze(window);
+    setTimeout(() => {
+        delete window.ENV;
+    }, 100);
 
     let supabaseClient = null;
     try {
