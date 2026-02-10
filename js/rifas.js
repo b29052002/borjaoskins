@@ -1,15 +1,12 @@
 (function() {
-    const SUPABASE_URL = window.ENV?.SUPABASE_URL;
-    const SUPABASE_KEY = window.ENV?.SUPABASE_KEY;
-    const MERCADOPAGO_PUBLIC_KEY = window.ENV?.MP_PUBLIC_KEY;
+    const SUPABASE_URL = window.ENV.SUPABASE_URL;
+    const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
+    const MERCADOPAGO_PUBLIC_KEY = window.ENV.MP_PUBLIC_KEY;
     const CLIENT_EMAIL = 'dproartes@gmail.com';
-    const ADMIN_PASSWORD_HASH = window.ENV?.ADMIN_HASH;
-    
-    setTimeout(() => {
-        delete window.ENV;
-    }, 100);
+    const ADMIN_PASSWORD_HASH = window.ENV.ADMIN_HASH;
 
     let supabaseClient = null;
+    let pendingSaleData = null;
     try {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     } catch(error) {
@@ -266,7 +263,13 @@
             
             if (saleError) throw saleError;
             
-            await generatePixPayment(saleData, totalAmount, numbersArray);
+            pendingSaleData = {
+                saleData: saleData,
+                totalAmount: totalAmount,
+                numbersArray: numbersArray
+            };
+            
+            showConfirmationModal(numbersArray);
         } catch(error) {
             alert('Erro ao processar compra: ' + (error.message || 'Tente novamente.'));
         }
@@ -775,6 +778,42 @@
             `<strong>Número sorteado:</strong> ${winnerNumber}<br>` +
             `<strong>Vencedor:</strong> ${winner.buyer_name}<br>` +
             `<strong>WhatsApp:</strong> ${winner.buyer_phone}`;
+    };
+
+    window.showConfirmationModal = function(numbers) {
+        const numbersContainer = document.getElementById('confirmationNumbers');
+        numbersContainer.innerHTML = '';
+        
+        numbers.sort((a, b) => a - b).forEach((num, index) => {
+            const numberBox = document.createElement('div');
+            numberBox.className = 'confirmation-number';
+            numberBox.textContent = num;
+            numberBox.style.animationDelay = `${index * 0.1}s`;
+            numbersContainer.appendChild(numberBox);
+        });
+        
+        document.getElementById('confirmationModal').style.display = 'flex';
+        document.getElementById('confirmationModal').classList.add('active');
+    };
+
+    window.closeConfirmationModal = function() {
+        document.getElementById('confirmationModal').classList.remove('active');
+        document.getElementById('confirmationModal').style.display = 'none';
+        pendingSaleData = null;
+        location.reload();
+    };
+
+    window.proceedToPayment = async function() {
+        if (!pendingSaleData) return;
+        
+        document.getElementById('confirmationModal').classList.remove('active');
+        document.getElementById('confirmationModal').style.display = 'none';
+        
+        await generatePixPayment(
+            pendingSaleData.saleData,
+            pendingSaleData.totalAmount,
+            pendingSaleData.numbersArray
+        );
     };
 
     init();
