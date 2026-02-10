@@ -282,7 +282,7 @@
        const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
        const MERCADOPAGO_PUBLIC_KEY = window.ENV.MP_PUBLIC_KEY;
        const CLIENT_EMAIL = 'dproartes@gmail.com';
-       const ADMIN_PASSWORD_HASH_HASH = window.ENV.ADMIN_HASH;
+       const ADMIN_PASSWORD_HASH = window.ENV.ADMIN_HASH;
 
         
         let supabaseClient = null;
@@ -651,7 +651,7 @@
                 if (currentRaffle.max_per_person && currentRaffle.max_per_person > 0) {
                     console.log('🔍 Verificando limite de cotas para telefone:', phone);
                     
-                    // Buscar todas as vendas aprovadas deste telefone
+                    
                     const { data: previousSales, error: salesError } = await supabaseClient
                         .from('raffle_sales')
                         .select('numbers')
