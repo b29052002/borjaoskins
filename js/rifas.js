@@ -6,7 +6,6 @@
     const ADMIN_PASSWORD_HASH = window.ENV.ADMIN_HASH;
 
     let supabaseClient = null;
-    let pendingSaleData = null;
     try {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     } catch(error) {
@@ -263,13 +262,7 @@
             
             if (saleError) throw saleError;
             
-            pendingSaleData = {
-                saleData: saleData,
-                totalAmount: totalAmount,
-                numbersArray: numbersArray
-            };
-            
-            showConfirmationModal(numbersArray);
+            await generatePixPayment(saleData, totalAmount, numbersArray);
         } catch(error) {
             alert('Erro ao processar compra: ' + (error.message || 'Tente novamente.'));
         }
@@ -378,15 +371,17 @@
             try {
                 const {data, error} = await supabaseClient
                     .from('raffle_sales')
-                    .select('payment_status')
+                    .select('payment_status, numbers')
                     .eq('id', saleId)
                     .single();
                 
                 if (data && data.payment_status === 'approved') {
                     clearInterval(window.paymentCheckInterval);
-                    alert('Pagamento confirmado! Seus números foram reservados com sucesso!');
-                    closePixModal();
-                    location.reload();
+                    
+                    document.getElementById('pixModal').classList.remove('active');
+                    document.getElementById('pixModal').style.display = 'none';
+                    
+                    showConfirmationModal(data.numbers);
                 }
             } catch(error) {
                 console.error('Erro ao verificar pagamento:', error);
@@ -799,21 +794,7 @@
     window.closeConfirmationModal = function() {
         document.getElementById('confirmationModal').classList.remove('active');
         document.getElementById('confirmationModal').style.display = 'none';
-        pendingSaleData = null;
         location.reload();
-    };
-
-    window.proceedToPayment = async function() {
-        if (!pendingSaleData) return;
-        
-        document.getElementById('confirmationModal').classList.remove('active');
-        document.getElementById('confirmationModal').style.display = 'none';
-        
-        await generatePixPayment(
-            pendingSaleData.saleData,
-            pendingSaleData.totalAmount,
-            pendingSaleData.numbersArray
-        );
     };
 
     init();
