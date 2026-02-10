@@ -94,10 +94,10 @@
         </div>
     </div>
 
-    <!-- Admin Trigger -->
+    
     <div class="admin-trigger" onclick="openAdminPanel()">⚙️</div>
 
-    <!-- Modal de Pagamento PIX -->
+   
     <div class="modal" id="pixModal" style="display: none;">
         <div class="modal-content" style="max-width: 500px; text-align: center;">
             <button class="modal-close" onclick="closePixModal()">×</button>
@@ -137,7 +137,7 @@
                 </div>
             </div>
 
-            <!-- Mini popup de obrigado -->
+            
             <div id="thankYouMini" style="display: none; text-align: center; padding: 40px;">
                 <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
                 <h3 style="color: #00ff88; font-size: 24px; margin-bottom: 10px;">Pagamento Confirmado!</h3>
@@ -149,7 +149,7 @@
         </div>
     </div>
 
-    <!-- Admin Panel -->
+  
     <div class="admin-panel" id="adminPanel">
         <div class="admin-container">
             <div class="admin-header">
@@ -157,7 +157,7 @@
                 <button class="admin-close" onclick="closeAdminPanel()">Fechar</button>
             </div>
 
-            <!-- Configurações da Rifa -->
+           
             <div class="admin-section">
                 <h2 class="admin-section-title">⚙️ Configurar Rifa</h2>
                 
@@ -234,7 +234,7 @@
                 </button>
             </div>
 
-            <!-- Estatísticas -->
+           
             <div class="admin-section">
                 <h2 class="admin-section-title">📊 Estatísticas</h2>
                 <button class="btn-primary" onclick="exportSales()" style="margin-bottom: 20px; background: linear-gradient(135deg, #00ff88, #00dd77); color: black;">
@@ -256,7 +256,7 @@
                 </div>
             </div>
 
-            <!-- Lista de Vendas -->
+           
             <div class="admin-section">
                 <h2 class="admin-section-title">🛒 Vendas Realizadas</h2>
                 <div class="sales-list" id="salesList">
@@ -264,7 +264,7 @@
                 </div>
             </div>
 
-            <!-- Realizar Sorteio -->
+            
             <div class="admin-section">
                 <h2 class="admin-section-title">🎲 Realizar Sorteio</h2>
                 <p style="margin-bottom: 20px;">Clique no botão abaixo para sortear um número vencedor entre os números vendidos.</p>
@@ -284,7 +284,7 @@
        const CLIENT_EMAIL = 'dproartes@gmail.com';
        const ADMIN_PASSWORD_HASH_HASH = window.ENV.ADMIN_HASH;
 
-        // Inicializar Supabase
+        
         let supabaseClient = null;
         
         try {
@@ -302,9 +302,9 @@
         let selectedNumbers = new Set();
         let soldNumbers = new Set();
 
-        // Inicializar
+       
         async function init() {
-            // Verificar se Supabase está configurado
+            
             if (!supabaseClient) {
                 document.getElementById('loadingMessage').textContent = '❌ Erro: Supabase não configurado corretamente.';
                 return;
@@ -317,15 +317,15 @@
                 renderNumbers();
                 updateCheckout();
                 
-                // 🔄 Atualizar números vendidos/reservados a cada 10 segundos
+               
                 setInterval(async () => {
                     await loadSoldNumbers();
                     renderNumbers();
-                }, 10000); // 10 segundos
+                }, 10000); 
             }
         }
 
-        // Carregar dados da rifa
+       
         async function loadRaffle() {
             try {
                 console.log('🔄 Carregando rifas...');
@@ -335,19 +335,19 @@
                     .from('raffles')
                     .select('*')
                     .eq('active', true)
-                    .maybeSingle(); // ✅ CORREÇÃO: maybeSingle não dá erro se não encontrar
+                    .maybeSingle(); 
 
                 console.log('📦 Resposta do Supabase:');
                 console.log('Data:', data);
                 console.log('Error:', error);
 
-                // Se houve erro de verdade (não de "não encontrado")
+                
                 if (error) {
                     console.error('❌ Erro Supabase:', error);
                     throw error;
                 }
 
-                // Se não encontrou nenhuma rifa ativa
+               
                 if (!data) {
                     document.getElementById('loadingMessage').innerHTML = `
                         <div style="text-align: center; padding: 80px 20px;">
@@ -370,7 +370,7 @@
             } catch (error) {
                 console.error('❌ Erro ao carregar rifa:', error);
                 
-                // Mensagem de erro genérica
+                
                 document.getElementById('loadingMessage').innerHTML = `
                     <div style="text-align: center; padding: 60px 20px;">
                         <div style="font-size: 64px; margin-bottom: 20px; color: #ff4444;">⚠️</div>
@@ -385,7 +385,7 @@
             }
         }
 
-        // Exibir dados da rifa
+       
         function displayRaffle() {
             if (!currentRaffle) return;
 
@@ -405,7 +405,6 @@
             document.getElementById('raffleContent').style.display = 'block';
         }
 
-        // Carregar números vendidos E reservados
         async function loadSoldNumbers() {
             if (!currentRaffle || !currentRaffle.id) {
                 console.error('Rifa não carregada');
@@ -413,7 +412,7 @@
             }
 
             try {
-                // Buscar números APROVADOS e RESERVADOS (últimos 2 minutos)
+               
                 const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
                 
                 const { data, error } = await supabaseClient
@@ -435,7 +434,7 @@
 
                 document.getElementById('soldCount').textContent = soldNumbers.size;
                 
-                // 🏆 Atualizar ranking após carregar números
+               
                 await loadRanking();
                 
             } catch (error) {
@@ -443,12 +442,12 @@
             }
         }
 
-        // 🏆 CARREGAR RANKING DE COMPRADORES
+       
         async function loadRanking() {
             if (!currentRaffle || !currentRaffle.id) return;
 
             try {
-                // Buscar todas as vendas aprovadas
+                
                 const { data, error } = await supabaseClient
                     .from('raffle_sales')
                     .select('buyer_name, numbers')
@@ -465,12 +464,12 @@
                     return;
                 }
 
-                // Agrupar por comprador e contar pontos
+               
                 const buyers = {};
                 
                 data.forEach(sale => {
-                    const firstName = sale.buyer_name.split(' ')[0]; // Apenas primeiro nome
-                    const points = sale.numbers.length; // 1 ponto por número
+                    const firstName = sale.buyer_name.split(' ')[0]; 
+                    const points = sale.numbers.length; 
                     
                     if (buyers[firstName]) {
                         buyers[firstName].points += points;
@@ -484,12 +483,11 @@
                     }
                 });
 
-                // Converter para array e ordenar por pontos
+                
                 const ranking = Object.values(buyers)
                     .sort((a, b) => b.points - a.points)
-                    .slice(0, 10); // Top 10
-
-                // Mostrar ranking apenas se tiver compradores
+                    .slice(0, 10);
+                
                 if (ranking.length > 0) {
                     rankingSection.style.display = 'block';
                 } else {
@@ -497,7 +495,7 @@
                     return;
                 }
 
-                // Renderizar ranking
+                
                 rankingContainer.innerHTML = '';
                 
                 ranking.forEach((buyer, index) => {
@@ -528,7 +526,7 @@
             }
         }
 
-        // Renderizar grid de números
+       
         function renderNumbers() {
             const grid = document.getElementById('numbersGrid');
             grid.innerHTML = '';
@@ -551,7 +549,7 @@
             }
         }
 
-        // Selecionar/Desselecionar número
+        
         function toggleNumber(number) {
             if (selectedNumbers.has(number)) {
                 selectedNumbers.delete(number);
@@ -563,7 +561,7 @@
             updateCheckout();
         }
 
-        // Atualizar display dos números
+        
         function updateNumbersDisplay() {
             document.querySelectorAll('.number-box').forEach(box => {
                 const num = parseInt(box.dataset.number);
@@ -575,7 +573,7 @@
             });
         }
 
-        // Atualizar checkout
+        
         function updateCheckout() {
             if (!currentRaffle) return;
 
@@ -589,31 +587,31 @@
             
             console.log('💵 Total calculado:', total);
 
-            // Aplicar promoção se aplicável
+            
             if (currentRaffle.promo_enabled && count >= currentRaffle.promo_min_numbers) {
                 total = total * (1 - currentRaffle.promo_discount / 100);
                 console.log('🎁 Total com desconto:', total);
             }
 
-            // ⚠️ VERIFICAR LIMITE DE COTAS
+            
             if (currentRaffle.max_per_person && currentRaffle.max_per_person > 0) {
                 const limit = currentRaffle.max_per_person;
                 const checkoutBtn = document.getElementById('checkoutBtn');
                 
                 if (count > limit) {
-                    // Ultrapassou o limite
+                   
                     checkoutBtn.disabled = true;
                     checkoutBtn.textContent = `❌ Limite: ${limit} números por pessoa`;
                     checkoutBtn.style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
                     return;
                 } else if (count > 0) {
-                    // Dentro do limite
+                    
                     checkoutBtn.disabled = false;
                     checkoutBtn.textContent = `Finalizar Compra via PIX (${count}/${limit} cotas)`;
                     checkoutBtn.style.background = 'linear-gradient(135deg, var(--purple), #6b1fa0)';
                 }
             } else {
-                // Sem limite
+                
                 document.getElementById('checkoutBtn').textContent = 'Finalizar Compra via PIX';
                 document.getElementById('checkoutBtn').style.background = 'linear-gradient(135deg, var(--purple), #6b1fa0)';
             }
@@ -622,7 +620,7 @@
             document.getElementById('checkoutBtn').disabled = count === 0;
         }
 
-        // Iniciar checkout
+       
         async function initCheckout() {
             if (selectedNumbers.size === 0) return;
 
@@ -632,16 +630,16 @@
             let phone = prompt('Digite seu WhatsApp (com DDD):\nExemplo: 11987654321');
             if (!phone || phone.trim() === '') return;
 
-            // Limpar telefone (remover espaços, parênteses, traços)
+            
             phone = phone.replace(/\D/g, '');
 
-            // Validar telefone brasileiro (10 ou 11 dígitos)
+           
             if (phone.length < 10 || phone.length > 11) {
                 alert('❌ Telefone inválido!\n\nDigite o WhatsApp com DDD (10 ou 11 números).\nExemplo: 11987654321');
                 return;
             }
 
-            // Verificar se começa com DDD válido (11-99)
+           
             const ddd = parseInt(phone.substring(0, 2));
             if (ddd < 11 || ddd > 99) {
                 alert('❌ DDD inválido!\n\nDigite um DDD válido (11 a 99).\nExemplo: 11987654321');
@@ -649,7 +647,7 @@
             }
 
             try {
-                // Verificar limite de cotas por pessoa
+                
                 if (currentRaffle.max_per_person && currentRaffle.max_per_person > 0) {
                     console.log('🔍 Verificando limite de cotas para telefone:', phone);
                     
@@ -663,7 +661,7 @@
 
                     if (salesError) throw salesError;
 
-                    // Contar quantas cotas a pessoa já comprou
+                    
                     let totalBought = 0;
                     if (previousSales && previousSales.length > 0) {
                         previousSales.forEach(sale => {
@@ -688,7 +686,7 @@
                     }
                 }
 
-                // Pegar valor total exibido e converter corretamente
+               
                 const totalText = document.getElementById('totalPrice').textContent;
                 console.log('📝 Total text:', totalText);
                 
@@ -697,7 +695,7 @@
                 
                 const numbersArray = Array.from(selectedNumbers);
 
-                // Salvar venda como pendente (reservado)
+                
                 const { data: saleData, error: saleError } = await supabaseClient
                     .from('raffle_sales')
                     .insert({
@@ -714,7 +712,7 @@
 
                 if (saleError) throw saleError;
 
-                // Gerar pagamento PIX com Mercado Pago
+                
                 await generatePixPayment(saleData, totalAmount, numbersArray);
 
             } catch (error) {
@@ -723,7 +721,7 @@
             }
         }
 
-        // Gerar pagamento PIX com Mercado Pago
+        
         async function generatePixPayment(saleData, amount, numbers) {
             try {
                 console.log('💳 Gerando PIX...');
@@ -750,7 +748,7 @@
                 
                 console.log('📤 Enviando para MP:', paymentData);
 
-                // Chamar Netlify Function para criar pagamento PIX REAL
+                
                 let response;
                 try {
                     response = await fetch('/.netlify/functions/create-pix', {
@@ -780,26 +778,26 @@
                     throw new Error('Resposta inválida do servidor');
                 }
 
-                // Verificar se houve erro
+               
                 if (!response.ok || pixData.error) {
                     console.error('❌ Erro na resposta:', pixData);
                     throw new Error(pixData.error || pixData.message || 'Erro ao gerar PIX');
                 }
 
-                // SDK v2 retorna qr_code direto no objeto
+              
                 if (pixData.qr_code_base64 && pixData.qr_code) {
                     console.log('✅ QR Code recebido com sucesso!');
                     
-                    // Atualizar venda com payment_id
+                    
                     await supabaseClient
                         .from('raffle_sales')
                         .update({ payment_id: pixData.id })
                         .eq('id', saleData.id);
 
-                    // Mostrar QR Code
+                   
                     displayPixQRCode(pixData.qr_code_base64, pixData.qr_code, pixData.id, saleData.id);
 
-                    // Iniciar verificação de pagamento
+                    
                     startPaymentCheck(pixData.id, saleData.id);
                 } else {
                     console.error('❌ Resposta sem QR Code:', pixData);
@@ -824,29 +822,29 @@
             }
         }
 
-        // Exibir QR Code PIX
+        
         function displayPixQRCode(qrCodeBase64, pixCodeString, paymentId, saleId) {
             document.getElementById('pixLoading').style.display = 'none';
             document.getElementById('pixContent').style.display = 'block';
 
-            // Exibir QR Code
+           
             const qrContainer = document.getElementById('qrCodeContainer');
             qrContainer.innerHTML = `<img src="data:image/png;base64,${qrCodeBase64}" alt="QR Code PIX" style="max-width: 300px;">`;
 
-            // Exibir código PIX
+          
             document.getElementById('pixCode').textContent = pixCodeString;
 
-            // Salvar para função de copiar
+            
             window.currentPixCode = pixCodeString;
         }
 
-        // Copiar código PIX
+      
         function copyPixCode() {
             if (window.currentPixCode) {
                 navigator.clipboard.writeText(window.currentPixCode).then(() => {
                     alert('✅ Código PIX copiado!');
                 }).catch(() => {
-                    // Fallback para navegadores antigos
+                   
                     const textarea = document.createElement('textarea');
                     textarea.value = window.currentPixCode;
                     document.body.appendChild(textarea);
@@ -858,23 +856,23 @@
             }
         }
 
-        // Fechar modal PIX
+       
         function closePixModal() {
             document.getElementById('pixModal').classList.remove('active');
             document.getElementById('pixModal').style.display = 'none';
             if (window.paymentCheckInterval) {
                 clearInterval(window.paymentCheckInterval);
             }
-            // Recarregar para atualizar números
+           
             location.reload();
         }
 
-        // Verificar status do pagamento
+        
         async function startPaymentCheck(paymentId, saleId) {
             let attempts = 0;
-            const maxAttempts = 60; // 15 minutos (60 * 15s)
+            const maxAttempts = 60; 
 
-            // Mostrar aviso sobre aprovação manual
+            
             console.log('🔄 Iniciando verificação de pagamento...');
             console.log('💡 Caso o pagamento não seja detectado automaticamente, use o painel admin para aprovar manualmente.');
 
@@ -889,7 +887,7 @@
                 }
 
                 try {
-                    // Verificar status no Supabase
+                   
                     const { data, error } = await supabaseClient
                         .from('raffle_sales')
                         .select('payment_status')
@@ -899,20 +897,25 @@
                     if (data && data.payment_status === 'approved') {
                         clearInterval(window.paymentCheckInterval);
                         
-                        // Mostrar sucesso
+                        
                         alert('🎉 Pagamento confirmado! Seus números foram reservados com sucesso!');
                         closePixModal();
                         
-                        // Recarregar página para mostrar números vendidos
+                        
                         location.reload();
                     }
                 } catch (error) {
                     console.error('Erro ao verificar pagamento:', error);
                 }
-            }, 15000); // Verificar a cada 15 segundos
+            }, 15000); 
         }
 
-        // ADMIN FUNCTIONS
+        async function hashPassword(password) {
+       const msgBuffer = new TextEncoder().encode(password);
+       const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+       const hashArray = Array.from(new Uint8Array(hashBuffer));
+       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+   }
 
         function openAdminPanel() {
             const password = prompt('🔐 Digite a senha do administrador:');
