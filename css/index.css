@@ -67,7 +67,7 @@ body {
 
 /* LOGO MAIOR */
 .logo {
-    width: 150px;
+    width: 200px;
     margin-bottom: 10px;
 }
 
@@ -81,7 +81,7 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 10px;
 }
 
