@@ -93,6 +93,7 @@ body {
     overflow: hidden;
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    line-height: 0;
 }
 
 .btn-main:hover {
@@ -104,6 +105,7 @@ body {
     width: 100%;
     height: auto;
     display: block;
+    vertical-align: middle;
 }
 
 .social-grid {
