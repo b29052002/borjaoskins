@@ -1,187 +1,177 @@
+
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  }
 
-/* Remove highlight mobile */
+
 a, button {
-    outline: none;
-    border: none;
-    -webkit-tap-highlight-color: transparent;
+outline: none;
+border: none;
+-webkit-tap-highlight-color: transparent;
 }
 
-/* Reset importante para video */
+
 video {
-    display: block;
-    max-width: 100%;
-    background: transparent !important;
-    border: none;
-    outline: none;
+display: block;
+width: 100%;
+height: auto;
+max-width: 100%;
+background: transparent !important;
+border: none !important;
+outline: none !important;
+object-fit: contain;
 }
+
 
 :root {
-    --purple: #9431ce;
-    --black: #000000;
-    --purple-glow: rgba(148, 49, 206, 0.4);
+--purple: #9431ce;
+--black: #000000;
+--purple-glow: rgba(148, 49, 206, 0.4);
 }
+
 
 body {
-    font-family: 'Rajdhani', sans-serif;
-    background: var(--black);
-    color: white;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
+font-family: 'Rajdhani', sans-serif;
+background: var(--black);
+color: white;
+min-height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow-x: hidden;
+position: relative;
 }
 
+
 .bg-animation {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    overflow: hidden;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 0;
+overflow: hidden;
 }
 
 .bg-animation::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: 
-        radial-gradient(circle at 20% 50%, var(--purple-glow) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, var(--purple-glow) 0%, transparent 50%);
-    animation: bgRotate 20s linear infinite;
+content: '';
+position: absolute;
+top: -50%;
+left: -50%;
+width: 200%;
+height: 200%;
+background:
+radial-gradient(circle at 20% 50%, var(--purple-glow) 0%, transparent 50%),
+radial-gradient(circle at 80% 80%, var(--purple-glow) 0%, transparent 50%);
+animation: bgRotate 20s linear infinite;
 }
 
 @keyframes bgRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
 }
 
 .container {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    max-width: 500px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+position: relative;
+z-index: 2;
+width: 100%;
+max-width: 520px;
+padding: 20px 10px 40px;
+display: flex;
+flex-direction: column;
+align-items: center;
 }
 
 .logo {
-    width: 120px;
-    height: 120px;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 10px 30px var(--purple-glow));
+width: 120px;
+height: 120px;
+margin-bottom: 20px;
+filter: drop-shadow(0 10px 30px var(--purple-glow));
 }
 
 .logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
+width: 100%;
+height: 100%;
+object-fit: contain;
+display: block;
 }
 
+
 .main-buttons {
-    width: 100%;
-    max-width: 400px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 25px;
+width: 100%;
+max-width: 500px;
+display: flex;
+flex-direction: column;
+gap: 14px;
+margin-bottom: 25px;
 }
 
 .btn-main {
-    width: 100%;
-    text-decoration: none;
-    transition: all 0.3s;
-    display: block;
-    overflow: hidden;
-    line-height: 0;
-
-    border: none;
-    outline: none;
-    background: transparent;
-    -webkit-tap-highlight-color: transparent;
+width: 100%;
+display: block;
+text-decoration: none;
+background: transparent;
+border: none;
+outline: none;
+line-height: 0;
+overflow: hidden;
 }
 
-.btn-main:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px var(--purple-glow);
-}
-
-/* VIDEO DO BOTÃO — parte importante */
+/* VIDEO DO BOTÃO */
 .btn-video {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    background: transparent;
-
-    /* Corta bordas internas do vídeo */
-    transform: scale(1.06);
+width: 100%;
+height: auto;
+display: block;
+object-fit: contain;
+background: transparent;
+border: none;
+outline: none;
 }
+
 
 .social-grid {
-    width: 100%;
-    max-width: 400px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+width: 100%;
+max-width: 500px;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 12px;
 }
+
 
 .btn-social {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(148, 49, 206, 0.3);
-    border-radius: 12px;
-    padding: 15px 10px;
-    color: white;
-    text-decoration: none;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    text-align: center;
-    transition: all 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    backdrop-filter: blur(10px);
-
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
+width: 100%;
+display: block;
+text-decoration: none;
+background: transparent;
+border: none;
+padding: 0;
+line-height: 0;
+-webkit-tap-highlight-color: transparent;
 }
 
-.btn-social:hover {
-    background: rgba(148, 49, 206, 0.2);
-    border-color: var(--purple);
-    transform: translateY(-2px);
-}
-
-.social-icon {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
-    display: block;
-}
 
 .btn-center {
-    grid-column: 1 / -1;
-    max-width: 180px;
-    margin: 0 auto;
+grid-column: 1 / -1;
+max-width: 500px;
+margin: 0 auto;
 }
 
 @media (max-width: 480px) {
-    .container {
+.container {
+padding: 15px 8px 30px;
+}
+
+```
+.main-buttons {
+    gap: 12px;
+}
+
+.social-grid {
+    gap: 10px;
+}
+```
+
+}
