@@ -4,6 +4,13 @@
     box-sizing: border-box;
 }
 
+/* Remove highlight e borda de toque no mobile */
+a, button {
+    outline: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
 :root {
     --purple: #9431ce;
     --black: #000000;
@@ -92,6 +99,16 @@ body {
     display: block;
     overflow: hidden;
     line-height: 0;
+
+    border: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-main:focus,
+.btn-main:active {
+    outline: none;
+    border: none;
 }
 
 .btn-main:hover {
@@ -132,6 +149,9 @@ body {
     justify-content: center;
     gap: 8px;
     backdrop-filter: blur(10px);
+
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-social:hover {
