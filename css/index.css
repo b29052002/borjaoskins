@@ -20,10 +20,10 @@ body {
     font-family: 'Rajdhani', sans-serif;
     background: var(--black);
     color: white;
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    overflow: hidden; /* evita scroll */
+    overflow: hidden;
 }
 
 /* FUNDO */
@@ -31,7 +31,6 @@ body {
     position: fixed;
     inset: 0;
     z-index: 0;
-    overflow: hidden;
 }
 
 .bg-animation::before {
@@ -52,23 +51,26 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* CONTAINER MAIS COMPACTO */
+/* CONTAINER COM SCALE */
 .container {
     position: relative;
     z-index: 2;
     width: 100%;
-    max-width: 480px;
-    padding: 10px 8px 15px;
+    max-width: 520px;
+    height: 100%;
+    padding: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    transform-origin: top center;
 }
 
-/* LOGO MAIOR */
+/* LOGO GRANDE */
 .logo {
-    width: 200px;
-    margin-bottom: 10px;
+    width: 250px;
+    margin-bottom: 8px;
 }
 
 .logo img {
@@ -76,18 +78,17 @@ body {
     display: block;
 }
 
-/* BOTÕES PRINCIPAIS */
+/* BOTÕES GRANDES */
 .main-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 
 .btn-main {
     width: 100%;
-    display: block;
     line-height: 0;
 }
 
@@ -96,12 +97,11 @@ body {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 6px;
+    margin-bottom: 6px;
 }
 
 .btn-social {
-    display: block;
     line-height: 0;
 }
 
@@ -126,24 +126,24 @@ body {
     pointer-events: none;
 }
 
-/* MOBILE MAIS COMPACTO AINDA */
+/* ===== AJUSTE POR ALTURA (MAGIA AQUI) ===== */
+
+@media (max-height: 800px) {
+    .container { transform: scale(0.95); }
+    .logo { width: 220px; }
+}
+
 @media (max-height: 700px) {
-    .logo {
-        width: 130px;
-        margin-bottom: 6px;
-    }
+    .container { transform: scale(0.9); }
+    .logo { width: 200px; }
+}
 
-    .main-buttons {
-        gap: 6px;
-        margin-bottom: 8px;
-    }
+@media (max-height: 620px) {
+    .container { transform: scale(0.85); }
+    .logo { width: 180px; }
+}
 
-    .social-grid {
-        gap: 6px;
-        margin-bottom: 8px;
-    }
-
-    .btn-bottom {
-        width: 50%;
-    }
+@media (max-height: 560px) {
+    .container { transform: scale(0.8); }
+    .logo { width: 160px; }
 }
