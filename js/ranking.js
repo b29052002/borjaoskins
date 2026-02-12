@@ -38,23 +38,21 @@ async function loadRanking() {
         document.getElementById('totalNumbers').textContent = totalNumbers;
         document.getElementById('totalPoints').textContent = Math.round(totalPoints);
 
-        
+        // AGRUPAR POR PONTUAÇÃO
         const grouped = [];
-        let currentPosition = 1;
         
         for (let i = 0; i < ranking.length; i++) {
             const currentPoints = Math.round(parseFloat(ranking[i].total_points || 0));
             
-            
+            // Se for o primeiro ou pontos diferentes do anterior
             if (i === 0 || currentPoints !== Math.round(parseFloat(ranking[i-1].total_points || 0))) {
-                currentPosition = i + 1; 
                 grouped.push({
-                    position: currentPosition,
+                    position: grouped.length + 1, // POSIÇÃO SEQUENCIAL
                     points: currentPoints,
                     players: [ranking[i]]
                 });
             } else {
-               
+                // Mesma pontuação = adiciona ao grupo anterior
                 grouped[grouped.length - 1].players.push(ranking[i]);
             }
         }
@@ -85,12 +83,12 @@ async function loadRanking() {
             item.className = 'ranking-item';
             item.style.animationDelay = `${groupIndex * 0.1}s`;
             
-         
+            // Borda destacada ATÉ posição 15 (não 16)
             if (position > 15) {
                 item.classList.add('ranking-item-inactive');
             }
             
-            
+            // TOP 1 menor
             if (position === 1) {
                 item.classList.add('ranking-item-top1');
             }
