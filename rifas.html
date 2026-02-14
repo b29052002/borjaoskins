@@ -16,7 +16,7 @@
     <div class="bg-animation"></div>
     <div class="container">
         <div class="header">
-            <a href="mrifas.html" style="display: block; width: fit-content; margin: 0 auto;">
+            <a href="linktree-cs.html" style="display: block; width: fit-content; margin: 0 auto;">
                 <div class="logo">
                     <img src="images/logodb.png" alt="Logo Borjão Skins">
                 </div>
@@ -75,6 +75,79 @@
         </div>
     </div>
     <div class="admin-trigger" onclick="openAdminPanel()">⚙️</div>
+
+    <div class="modal" id="dadosModal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <button class="modal-close" onclick="closeDadosModal()">×</button>
+            
+            <div style="font-size: 60px; margin-bottom: 15px;">🎫</div>
+            
+            <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--purple); margin-bottom: 10px;">
+                FINALIZE SUA COMPRA
+            </h2>
+            
+            <p style="font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 25px;">
+                Preencha seus dados para reservar seus números
+            </p>
+            
+            <div style="text-align: left; margin-bottom: 20px;">
+                <label style="display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                    Nome e Sobrenome
+                </label>
+                <input 
+                    type="text" 
+                    id="inputNome" 
+                    placeholder="Ex: João Silva"
+                    style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(148,49,206,0.3); border-radius: 10px; color: white; font-size: 16px; font-family: 'Rajdhani', sans-serif;"
+                >
+            </div>
+            
+            <div style="text-align: left; margin-bottom: 25px;">
+                <label style="display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                    WhatsApp (com DDD)
+                </label>
+                <input 
+                    type="tel" 
+                    id="inputTelefone" 
+                    placeholder="Ex: 11987654321"
+                    maxlength="11"
+                    style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(148,49,206,0.3); border-radius: 10px; color: white; font-size: 16px; font-family: 'Rajdhani', sans-serif;"
+                >
+            </div>
+            
+            <button 
+                onclick="processarCompra()" 
+                style="width: 100%; background: linear-gradient(135deg, var(--purple), #6b1fa0); border: none; color: white; padding: 18px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 18px; font-family: 'Orbitron', sans-serif;"
+            >
+                💳 Continuar para Pagamento
+            </button>
+            
+            <button 
+                onclick="closeDadosModal()" 
+                style="width: 100%; background: transparent; border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 16px; margin-top: 10px;"
+            >
+                ✕ Cancelar
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="loadingModal" style="display: none;">
+        <div class="modal-content" style="max-width: 450px; text-align: center;">
+            <div class="spinner" style="width: 80px; height: 80px; border: 8px solid rgba(148,49,206,0.2); border-top: 8px solid var(--purple); border-radius: 50%; margin: 0 auto 25px; animation: spin 1s linear infinite;"></div>
+            
+            <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--purple); margin-bottom: 15px;">
+                ESTAMOS SEPARANDO<br>SEUS NÚMEROS
+            </h2>
+            
+            <p style="font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 10px;">
+                Aguarde enquanto verificamos a disponibilidade...
+            </p>
+            
+            <p style="font-size: 14px; color: rgba(255,255,255,0.4);">
+                ⏱️ Isso pode levar alguns segundos
+            </p>
+        </div>
+    </div>
 
     <div class="modal" id="confirmationModal" style="display: none;">
         <div class="modal-content" style="max-width: 600px; text-align: center;">
@@ -191,6 +264,18 @@
                 <button class="btn-primary" onclick="createNewRaffle()" id="btnCreateRaffle" style="display: none; background: linear-gradient(135deg, #00ff88, #00dd77); color: black;">✨ Criar</button>
                 <button class="btn-primary" onclick="finishRaffle()" id="btnFinishRaffle" style="background: linear-gradient(135deg, #ff4444, #cc0000); margin-left: 10px;">🏁 Finalizar</button>
             </div>
+            
+            <div class="admin-section">
+                <h2 class="admin-section-title">🔄 Verificar e Realocar Números</h2>
+                <p style="margin-bottom: 15px; color: rgba(255,255,255,0.7);">
+                    Verifica se há números duplicados nas vendas e realoca automaticamente para números disponíveis.
+                </p>
+                <button class="btn-primary" onclick="verificarDuplicados()" id="btnVerificar">
+                    🔍 Verificar Números Duplicados
+                </button>
+                <div id="duplicadosResult" style="margin-top: 20px;"></div>
+            </div>
+            
             <div class="admin-section">
                 <h2 class="admin-section-title">📊 Estatísticas</h2>
                 <button class="btn-primary" onclick="exportSales()" style="margin-bottom: 20px; background: linear-gradient(135deg, #00ff88, #00dd77); color: black;">📥 Exportar</button>
@@ -225,6 +310,14 @@
             </div>
         </div>
     </div>
+    
+    <style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
+    
     <script src="js/rifas.js"></script>
 </body>
 </html>
