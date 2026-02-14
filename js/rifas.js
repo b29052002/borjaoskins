@@ -17,23 +17,62 @@
     let soldNumbers = new Set();
 
     async function init() {
+        console.log('🔵 Inicializando rifa...');
+        
         if (!supabaseClient) {
-            document.getElementById('loadingMessage').textContent = 'Erro: Supabase não configurado.';
+            console.error('❌ Supabase não configurado');
+            document.getElementById('loadingMessage').innerHTML = 
+                '<div style="text-align:center;padding:60px 20px;">' +
+                '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
+                '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro de Conexão</h2>' +
+                '<p style="color:rgba(255,255,255,0.7);margin-bottom:20px;">Não foi possível conectar ao servidor.</p>' +
+                '<button onclick="location.reload()" style="background: var(--purple); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">🔄 Tentar Novamente</button>' +
+                '</div>';
             return;
         }
-        await loadRaffle();
-        if (currentRaffle) {
-            await loadSoldNumbers();
-            renderNumbers();
-            updateCheckout();
-            setInterval(async () => {
+        
+        try {
+            const loadPromise = loadRaffle();
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 10000)
+            );
+            
+            await Promise.race([loadPromise, timeoutPromise]);
+            
+            console.log('✅ Rifa carregada');
+            
+            if (currentRaffle) {
+                console.log('📊 Carregando números vendidos...');
                 await loadSoldNumbers();
                 renderNumbers();
-            }, 10000);
+                updateCheckout();
+                
+                setInterval(async () => {
+                    try {
+                        await loadSoldNumbers();
+                        renderNumbers();
+                    } catch (error) {
+                        console.error('Erro ao atualizar números:', error);
+                    }
+                }, 10000);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao inicializar:', error);
+            
+            document.getElementById('loadingMessage').innerHTML = 
+                '<div style="text-align:center;padding:60px 20px;">' +
+                '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
+                '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro ao Carregar</h2>' +
+                '<p style="color:rgba(255,255,255,0.7);margin-bottom:10px;">Não foi possível carregar a rifa.</p>' +
+                '<p style="color:rgba(255,255,255,0.5);font-size:14px;margin-bottom:20px;">Verifique sua conexão com a internet.</p>' +
+                '<button onclick="location.reload()" style="background: var(--purple); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">🔄 Tentar Novamente</button>' +
+                '</div>';
         }
     }
 
     async function loadRaffle() {
+        console.log('🔍 Buscando rifa ativa...');
+        
         try {
             const {data, error} = await supabaseClient
                 .from('raffles')
@@ -41,27 +80,37 @@
                 .eq('active', true)
                 .maybeSingle();
             
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Erro do Supabase:', error);
+                throw error;
+            }
             
             if (!data) {
+                console.log('⚠️ Nenhuma rifa ativa');
                 document.getElementById('loadingMessage').innerHTML = 
                     '<div style="text-align:center;padding:80px 20px;">' +
                     '<div style="font-size:80px;margin-bottom:30px;">🎰</div>' +
                     '<h2 style="font-family:\'Orbitron\',sans-serif;font-size:42px;color:var(--purple);margin-bottom:20px;">No Momento<br>Sem Rifas</h2>' +
-                    '<p style="color:rgba(255,255,255,0.7);font-size:18px;">Não há nenhuma rifa ativa no momento.<br>Aguarde novas rifas em breve!</p>' +
+                    '<p style="color:rgba(255,255,255,0.7);font-size:18px;margin-bottom:25px;">Não há nenhuma rifa ativa no momento.<br>Aguarde novas rifas em breve!</p>' +
+                    '<a href="rifas-menu.html" style="display:inline-block;background:var(--purple);color:white;padding:12px 30px;border-radius:8px;text-decoration:none;font-weight:600;">← Voltar ao Menu</a>' +
                     '</div>';
                 return;
             }
             
+            console.log('✅ Rifa encontrada:', data.title);
             currentRaffle = data;
             displayRaffle();
+            
         } catch(error) {
+            console.error('❌ Erro ao carregar rifa:', error);
             document.getElementById('loadingMessage').innerHTML = 
                 `<div style="text-align:center;padding:60px 20px;">` +
                 `<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>` +
-                `<h2 style="font-size:24px;color:#ff4444;">Erro ao Carregar Rifa</h2>` +
-                `<p style="color:rgba(255,255,255,0.6);font-size:14px;">${error.message || 'Erro desconhecido'}</p>` +
+                `<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro ao Carregar Rifa</h2>` +
+                `<p style="color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:20px;">${error.message || 'Erro desconhecido'}</p>` +
+                `<button onclick="location.reload()" style="background: var(--purple); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">🔄 Tentar Novamente</button>` +
                 `</div>`;
+            throw error;
         }
     }
 
