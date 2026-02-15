@@ -75,6 +75,141 @@
         </div>
     </div>
     <div class="admin-trigger" onclick="openAdminPanel()">⚙️</div>
+    <div class="modal" id="authModal" style="display: none;">
+    <div class="modal-content" style="max-width: 450px; text-align: center;">
+        <button class="modal-close" onclick="closeAuthModal()">×</button>
+        
+        <div style="font-size: 60px; margin-bottom: 15px;">🔐</div>
+        
+        <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--purple); margin-bottom: 10px;">
+            BEM-VINDO!
+        </h2>
+        
+        <p style="font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 25px;">
+            Entre ou crie sua conta para acumular pontos
+        </p>
+        
+        <!-- ABAS LOGIN/REGISTRO -->
+        <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+            <button id="tabLogin" onclick="switchAuthTab('login')" style="flex: 1; padding: 12px; background: var(--purple); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                Entrar
+            </button>
+            <button id="tabRegister" onclick="switchAuthTab('register')" style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                Criar Conta
+            </button>
+        </div>
+        <div id="loginForm" style="display: block;">
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label style="display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                    E-mail
+                </label>
+                <input 
+                    type="email" 
+                    id="loginEmail" 
+                    placeholder="seu@email.com"
+                    style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(148,49,206,0.3); border-radius: 10px; color: white; font-size: 16px;"
+                >
+            </div>
+            
+            <div style="text-align: left; margin-bottom: 20px;">
+                <label style="display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                    Senha
+                </label>
+                <input 
+                    type="password" 
+                    id="loginPassword" 
+                    placeholder="••••••••"
+                    style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(148,49,206,0.3); border-radius: 10px; color: white; font-size: 16px;"
+                >
+            </div>
+            
+            <button onclick="handleLogin()" style="width: 100%; background: linear-gradient(135deg, var(--purple), #6b1fa0); border: none; color: white; padding: 18px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 18px; margin-bottom: 15px;">
+                🔓 Entrar
+            </button>
+        </div>
+        
+        <div id="registerForm" style="display: none;">
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label style="display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                    Nome Completo
+                </label>
+                <input 
+                    type="text" 
+                    id="registerName" 
+                    placeholder="João Silva"
+                    style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(148,49,206,0.3); border-radius: 10px; color: white; font-size: 16px;"
+                >
+            </div>
+            
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label style="display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                    WhatsApp (com DDD)
+                </label>
+                <input 
+                    type="tel" 
+                    id="registerPhone" 
+                    placeholder="11987654321"
+                    maxlength="11"
+                    style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(148,49,206,0.3); border-radius: 10px; color: white; font-size: 16px;"
+                >
+            </div>
+            
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label style="display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                    E-mail
+                </label>
+                <input 
+                    type="email" 
+                    id="registerEmail" 
+                    placeholder="seu@email.com"
+                    style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(148,49,206,0.3); border-radius: 10px; color: white; font-size: 16px;"
+                >
+            </div>
+            
+            <div style="text-align: left; margin-bottom: 20px;">
+                <label style="display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                    Senha (mínimo 6 caracteres)
+                </label>
+                <input 
+                    type="password" 
+                    id="registerPassword" 
+                    placeholder="••••••••"
+                    style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(148,49,206,0.3); border-radius: 10px; color: white; font-size: 16px;"
+                >
+            </div>
+            
+            <button onclick="handleRegister()" style="width: 100%; background: linear-gradient(135deg, #00ff88, #00dd77); border: none; color: black; padding: 18px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 18px; margin-bottom: 15px;">
+                ✨ Criar Conta
+            </button>
+        </div>
+        
+        <div style="text-align: center; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.1);">
+            <button onclick="continueWithoutLogin()" style="background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 15px; text-decoration: underline;">
+                Continuar sem login
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- BANNER DE USUÁRIO LOGADO -->
+<div id="userBanner" style="display: none; position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, rgba(148,49,206,0.95), rgba(107,31,160,0.95)); padding: 15px 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 999; max-width: 350px;">
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+        <div>
+            <div style="font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 3px;">Olá,</div>
+            <div id="userName" style="font-weight: 700; font-size: 18px; color: white;"></div>
+        </div>
+        <button onclick="handleLogout()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+            Sair
+        </button>
+    </div>
+    <div id="userNumbers" style="font-size: 13px; color: rgba(255,255,255,0.9); display: none;">
+        <strong>Seus números nesta rifa:</strong>
+        <div id="userNumbersList" style="margin-top: 5px; font-weight: 600; color: #00ff88;"></div>
+    </div>
+    <div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 8px;">
+        <span id="userPoints">0</span> pontos acumulados 🏆
+    </div>
+</div>
 
     <div class="modal" id="dadosModal" style="display: none;">
         <div class="modal-content" style="max-width: 500px; text-align: center;">
