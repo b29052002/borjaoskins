@@ -771,7 +771,7 @@
         }
     }
 
-        window.exportSales = async function() {
+    window.exportSales = async function() {
         if (!currentRaffle) return;
 
         try {
@@ -820,7 +820,6 @@
             alert('Erro ao exportar: ' + error.message);
         }
     };
-
 
     window.drawWinner = async function() {
         if (!currentRaffle) return;
@@ -1223,57 +1222,4 @@
     }
 
     init();
-})();
-
-    window.exportSalesTxt = async function() {
-        if (!currentRaffle) return;
-
-        try {
-            const {data: sales, error} = await supabaseClient
-                .from('raffle_sales')
-                .select('*')
-                .eq('raffle_id', currentRaffle.id)
-                .eq('payment_status', 'approved')
-                .order('created_at', {ascending: false});
-
-            if (error) throw error;
-
-            if (!sales || sales.length === 0) {
-                alert('Nenhuma venda aprovada para exportar');
-                return;
-            }
-
-            let txt = `VENDAS DA RIFA: ${currentRaffle.title}\n`;
-            txt += `Data de exportação: ${new Date().toLocaleString('pt-BR')}\n`;
-            txt += `Total de vendas: ${sales.length}\n`;
-            txt += `\n${'='.repeat(80)}\n\n`;
-
-            sales.forEach((sale, index) => {
-                txt += `VENDA #${index + 1}\n`;
-                txt += `${'─'.repeat(80)}\n`;
-                txt += `Nome: ${sale.buyer_name}\n`;
-                txt += `Telefone: ${sale.buyer_phone}\n`;
-                txt += `Números: ${sale.numbers ? sale.numbers.join(', ') : 'N/A'}\n`;
-                txt += `Valor: R$ ${(sale.total_amount || 0).toFixed(2)}\n`;
-                txt += `Data: ${new Date(sale.created_at).toLocaleString('pt-BR')}\n`;
-                txt += `\n`;
-            });
-
-            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `vendas_${currentRaffle.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.txt`;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            alert('✅ Arquivo TXT exportado!');
-
-        } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro ao exportar: ' + error.message);
-        }
 })();
