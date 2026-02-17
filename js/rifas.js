@@ -1,145 +1,132 @@
 (function() {
+    const SUPABASE_URL = window.ENV.SUPABASE_URL;
+    const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
+    const MERCADOPAGO_PUBLIC_KEY = window.ENV.MP_PUBLIC_KEY;
     const CLIENT_EMAIL = 'dproartes@gmail.com';
-    const ADMIN_PASSWORD_HASH = window.ENV?.ADMIN_HASH || '';
+    const ADMIN_PASSWORD_HASH = window.ENV.ADMIN_HASH;
 
-    let supabaseClient = null;
+  let supabaseClient = null;
+let initAttempts = 0;
+const MAX_INIT_ATTEMPTS = 3;
+
+async function init() {
+    console.log('🔵 Iniciando... Tentativa', initAttempts + 1);
+    
+    if (!supabaseClient && !initSupabase()) {
+        if (initAttempts < MAX_INIT_ATTEMPTS) {
+            initAttempts++;
+            console.log('⏳ Aguardando libraries...');
+            setTimeout(init, 500);
+            return;
+        }
+        
+        console.error('❌ Falha após', MAX_INIT_ATTEMPTS, 'tentativas');
+        showError('Erro de Conexão', 'Não foi possível conectar. Recarregue a página.');
+        return;
+    }
+    
+    console.log('🔍 Carregando rifa...');
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        
+        await loadRaffleWithAbort(controller.signal);
+        clearTimeout(timeoutId);
+        
+        if (!currentRaffle) {
+            console.log('⚠️ Sem rifas');
+            return;
+        }
+        
+        console.log('✅ Rifa:', currentRaffle.title);
+        console.log('📊 Carregando números...');
+        
+        loadSoldNumbers().then(() => {
+            renderNumbers();
+            updateCheckout();
+            console.log('✅ Pronto!');
+        });
+        
+        setInterval(async () => {
+            try {
+                await loadSoldNumbers();
+                renderNumbers();
+            } catch (error) {
+                console.error('⚠️ Erro ao atualizar:', error);
+            }
+        }, 15000);
+        
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.error('❌ Timeout');
+            showError('Conexão Lenta', 'A rifa está demorando. Verifique sua internet.');
+        } else {
+            console.error('❌ Erro:', error);
+            showError('Erro ao Carregar', 'Não foi possível carregar a rifa.');
+        }
+    }
+}
+
     let currentRaffle = null;
     let selectedNumbers = new Set();
     let soldNumbers = new Set();
 
-    // ==========================================
-    // AGUARDAR ENV CARREGAR
-    // ==========================================
-    async function waitForEnv(maxAttempts = 10) {
-        for (let i = 0; i < maxAttempts; i++) {
-            if (window.ENV && window.ENV.SUPABASE_URL && window.ENV.SUPABASE_KEY) {
-                console.log('✅ ENV carregado na tentativa', i + 1);
-                return true;
-            }
-            console.log('⏳ Aguardando ENV... tentativa', i + 1);
-            await new Promise(resolve => setTimeout(resolve, 300));
-        }
-        return false;
-    }
-
-    // ==========================================
-    // INICIALIZAR SUPABASE
-    // ==========================================
-    function initSupabase() {
-        try {
-            if (!window.supabase) {
-                console.error('❌ Supabase library não carregada');
-                return false;
-            }
-
-            if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_KEY) {
-                console.error('❌ ENV não disponível');
-                return false;
-            }
-
-            supabaseClient = window.supabase.createClient(
-                window.ENV.SUPABASE_URL,
-                window.ENV.SUPABASE_KEY
-            );
-
-            console.log('✅ Supabase inicializado');
-            return true;
-
-        } catch (error) {
-            console.error('❌ Erro ao inicializar Supabase:', error);
-            return false;
-        }
-    }
-
     async function init() {
-        console.log('🔵 Iniciando aplicação...');
-
-        // Aguardar ENV carregar
-        const envLoaded = await waitForEnv();
+        console.log('🔵 Inicializando rifa...');
         
-        if (!envLoaded) {
-            console.error('❌ ENV não carregou');
-            document.getElementById('loadingMessage').innerHTML = 
-                '<div style="text-align:center;padding:60px 20px;">' +
-                '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
-                '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro de Configuração</h2>' +
-                '<p style="color:rgba(255,255,255,0.7);margin-bottom:20px;">Não foi possível carregar as configurações.</p>' +
-                '<button onclick="location.reload()" style="background:var(--purple);color:white;border:none;padding:15px 30px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;">🔄 Recarregar</button>' +
-                '</div>';
-            return;
-        }
-
-        // Inicializar Supabase
-        if (!initSupabase()) {
-            console.error('❌ Falha ao inicializar Supabase');
+        if (!supabaseClient) {
+            console.error('❌ Supabase não configurado');
             document.getElementById('loadingMessage').innerHTML = 
                 '<div style="text-align:center;padding:60px 20px;">' +
                 '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
                 '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro de Conexão</h2>' +
                 '<p style="color:rgba(255,255,255,0.7);margin-bottom:20px;">Não foi possível conectar ao servidor.</p>' +
-                '<button onclick="location.reload()" style="background:var(--purple);color:white;border:none;padding:15px 30px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;">🔄 Recarregar</button>' +
+                '<button onclick="location.reload()" style="background: var(--purple); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">🔄 Tentar Novamente</button>' +
                 '</div>';
             return;
         }
-
-        console.log('🔍 Carregando rifa...');
         
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-            await loadRaffleWithAbort(controller.signal);
-            clearTimeout(timeoutId);
-
-            if (!currentRaffle) {
-                console.log('⚠️ Nenhuma rifa ativa');
-                return;
-            }
-
-            console.log('✅ Rifa carregada:', currentRaffle.title);
-            console.log('📊 Carregando números...');
-
-            loadSoldNumbers().then(() => {
+            const loadPromise = loadRaffle();
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 10000)
+            );
+            
+            await Promise.race([loadPromise, timeoutPromise]);
+            
+            console.log('✅ Rifa carregada');
+            
+            if (currentRaffle) {
+                console.log('📊 Carregando números vendidos...');
+                await loadSoldNumbers();
                 renderNumbers();
                 updateCheckout();
-                console.log('✅ Tudo pronto!');
-            }).catch(err => {
-                console.error('⚠️ Erro ao carregar números:', err);
-            });
-
-            setInterval(async () => {
-                try {
-                    await loadSoldNumbers();
-                    renderNumbers();
-                } catch (error) {
-                    console.error('⚠️ Erro ao atualizar:', error);
-                }
-            }, 15000);
-
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                console.error('❌ Timeout');
-                document.getElementById('loadingMessage').innerHTML = 
-                    '<div style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
-                    '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Conexão Lenta</h2>' +
-                    '<p style="color:rgba(255,255,255,0.7);margin-bottom:20px;">A rifa está demorando para carregar.</p>' +
-                    '<button onclick="location.reload()" style="background:var(--purple);color:white;border:none;padding:15px 30px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;">🔄 Recarregar</button>' +
-                    '</div>';
-            } else {
-                console.error('❌ Erro:', error);
-                document.getElementById('loadingMessage').innerHTML = 
-                    '<div style="text-align:center;padding:60px 20px;">' +
-                    '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
-                    '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro ao Carregar</h2>' +
-                    '<p style="color:rgba(255,255,255,0.7);margin-bottom:20px;">Não foi possível carregar a rifa.</p>' +
-                    '<button onclick="location.reload()" style="background:var(--purple);color:white;border:none;padding:15px 30px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;">🔄 Recarregar</button>' +
-                    '</div>';
+                
+                setInterval(async () => {
+                    try {
+                        await loadSoldNumbers();
+                        renderNumbers();
+                    } catch (error) {
+                        console.error('Erro ao atualizar números:', error);
+                    }
+                }, 10000);
             }
+        } catch (error) {
+            console.error('❌ Erro ao inicializar:', error);
+            
+            document.getElementById('loadingMessage').innerHTML = 
+                '<div style="text-align:center;padding:60px 20px;">' +
+                '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
+                '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro ao Carregar</h2>' +
+                '<p style="color:rgba(255,255,255,0.7);margin-bottom:10px;">Não foi possível carregar a rifa.</p>' +
+                '<p style="color:rgba(255,255,255,0.5);font-size:14px;margin-bottom:20px;">Verifique sua conexão com a internet.</p>' +
+                '<button onclick="location.reload()" style="background: var(--purple); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">🔄 Tentar Novamente</button>' +
+                '</div>';
         }
     }
 
-    async function loadRaffleWithAbort(signal) {
+    async function loadRaffle() {
         console.log('🔍 Buscando rifa ativa...');
         
         try {
@@ -147,7 +134,6 @@
                 .from('raffles')
                 .select('*')
                 .eq('active', true)
-                .abortSignal(signal)
                 .maybeSingle();
             
             if (error) {
@@ -859,43 +845,19 @@
                 return;
             }
 
-            let txt = '';
-
-            // Para cada venda, repetir o nome com o número ao lado
+            let csv = 'Nome,Telefone,Números,Valor,Data\n';
             sales.forEach(sale => {
-                const nome = sale.buyer_name;
-                const numeros = sale.numbers || [];
-                
-                // Repetir o nome com cada número ao lado
-                numeros.forEach(numero => {
-                    txt += `${nome} - ${numero}\n`;
-                });
+                const numbers = sale.numbers ? sale.numbers.join(' ') : '';
+                const date = new Date(sale.created_at).toLocaleString('pt-BR');
+                csv += `"${sale.buyer_name}","${sale.buyer_phone}","${numbers}","R$ ${(sale.total_amount || 0).toFixed(2)}","${date}"\n`;
             });
 
-            // RESUMO
-            txt += '\n';
-            txt += '='.repeat(80) + '\n';
-            txt += 'RESUMO\n';
-            txt += '='.repeat(80) + '\n\n';
-
-            sales.forEach(sale => {
-                const nome = sale.buyer_name;
-                const numeros = sale.numbers || [];
-                txt += `${nome} = ${numeros.join(', ')}\n`;
-            });
-
-            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
+            const blob = new Blob([csv], {type: 'text/csv'});
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `vendas_${currentRaffle.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.txt`;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            alert('✅ Arquivo TXT exportado!');
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vendas_${currentRaffle.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.csv`;
+            a.click();
 
         } catch (error) {
             console.error('Erro:', error);
