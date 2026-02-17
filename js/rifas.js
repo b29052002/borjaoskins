@@ -861,15 +861,27 @@
 
             let txt = '';
 
-            // Para cada venda, repetir o nome para cada número
+            // Para cada venda, repetir o nome com o número ao lado
             sales.forEach(sale => {
                 const nome = sale.buyer_name;
                 const numeros = sale.numbers || [];
                 
-                // Repetir o nome para cada número
+                // Repetir o nome com cada número ao lado
                 numeros.forEach(numero => {
-                    txt += `${nome}\n`;
+                    txt += `${nome} - ${numero}\n`;
                 });
+            });
+
+            // RESUMO
+            txt += '\n';
+            txt += '='.repeat(80) + '\n';
+            txt += 'RESUMO\n';
+            txt += '='.repeat(80) + '\n\n';
+
+            sales.forEach(sale => {
+                const nome = sale.buyer_name;
+                const numeros = sale.numbers || [];
+                txt += `${nome} = ${numeros.join(', ')}\n`;
             });
 
             const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
