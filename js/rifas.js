@@ -771,7 +771,7 @@
         }
     }
 
-    window.exportSales = async function() {
+        window.exportSales = async function() {
         if (!currentRaffle) return;
 
         try {
@@ -789,25 +789,38 @@
                 return;
             }
 
-            let csv = 'Nome,Telefone,Números,Valor,Data\n';
+            let csv = '\uFEFF';
+            csv += 'Nome,Telefone,Numeros,Valor,Data\n';
+            
             sales.forEach(sale => {
-                const numbers = sale.numbers ? sale.numbers.join(' ') : '';
-                const date = new Date(sale.created_at).toLocaleString('pt-BR');
-                csv += `"${sale.buyer_name}","${sale.buyer_phone}","${numbers}","R$ ${(sale.total_amount || 0).toFixed(2)}","${date}"\n`;
+                const nome = (sale.buyer_name || '').replace(/,/g, ' ');
+                const telefone = sale.buyer_phone || '';
+                const numeros = sale.numbers ? sale.numbers.join(' ') : '';
+                const valor = (sale.total_amount || 0).toFixed(2);
+                const data = new Date(sale.created_at).toLocaleString('pt-BR');
+                
+                csv += `${nome},${telefone},${numeros},R$ ${valor},${data}\n`;
             });
 
-            const blob = new Blob([csv], {type: 'text/csv'});
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `vendas_${currentRaffle.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.csv`;
-            a.click();
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `vendas_${currentRaffle.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.csv`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Arquivo CSV exportado!');
 
         } catch (error) {
             console.error('Erro:', error);
             alert('Erro ao exportar: ' + error.message);
         }
     };
+
 
     window.drawWinner = async function() {
         if (!currentRaffle) return;
@@ -1210,4 +1223,57 @@
     }
 
     init();
+})();
+
+    window.exportSalesTxt = async function() {
+        if (!currentRaffle) return;
+
+        try {
+            const {data: sales, error} = await supabaseClient
+                .from('raffle_sales')
+                .select('*')
+                .eq('raffle_id', currentRaffle.id)
+                .eq('payment_status', 'approved')
+                .order('created_at', {ascending: false});
+
+            if (error) throw error;
+
+            if (!sales || sales.length === 0) {
+                alert('Nenhuma venda aprovada para exportar');
+                return;
+            }
+
+            let txt = `VENDAS DA RIFA: ${currentRaffle.title}\n`;
+            txt += `Data de exportação: ${new Date().toLocaleString('pt-BR')}\n`;
+            txt += `Total de vendas: ${sales.length}\n`;
+            txt += `\n${'='.repeat(80)}\n\n`;
+
+            sales.forEach((sale, index) => {
+                txt += `VENDA #${index + 1}\n`;
+                txt += `${'─'.repeat(80)}\n`;
+                txt += `Nome: ${sale.buyer_name}\n`;
+                txt += `Telefone: ${sale.buyer_phone}\n`;
+                txt += `Números: ${sale.numbers ? sale.numbers.join(', ') : 'N/A'}\n`;
+                txt += `Valor: R$ ${(sale.total_amount || 0).toFixed(2)}\n`;
+                txt += `Data: ${new Date(sale.created_at).toLocaleString('pt-BR')}\n`;
+                txt += `\n`;
+            });
+
+            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `vendas_${currentRaffle.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.txt`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Arquivo TXT exportado!');
+
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao exportar: ' + error.message);
+        }
 })();
