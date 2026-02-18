@@ -7,9 +7,6 @@
     let selectedNumbers = new Set();
     let soldNumbers = new Set();
 
-    // ==========================================
-    // AGUARDAR ENV CARREGAR
-    // ==========================================
     async function waitForEnv(maxAttempts = 10) {
         for (let i = 0; i < maxAttempts; i++) {
             if (window.ENV && window.ENV.SUPABASE_URL && window.ENV.SUPABASE_KEY) {
@@ -22,9 +19,6 @@
         return false;
     }
 
-    // ==========================================
-    // INICIALIZAR SUPABASE
-    // ==========================================
     function initSupabase() {
         try {
             if (!window.supabase) {
@@ -54,7 +48,7 @@
     async function init() {
         console.log('🔵 Iniciando aplicação...');
 
-        // Aguardar ENV carregar
+       
         const envLoaded = await waitForEnv();
         
         if (!envLoaded) {
