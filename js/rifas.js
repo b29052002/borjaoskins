@@ -859,20 +859,25 @@
                 return;
             }
 
-            let txt = '';
-
-            // Para cada venda, repetir o nome com o número ao lado
+            const todosNumeros = [];
+            
             sales.forEach(sale => {
                 const nome = sale.buyer_name;
                 const numeros = sale.numbers || [];
                 
-                // Repetir o nome com cada número ao lado
                 numeros.forEach(numero => {
-                    txt += `${nome} - ${numero}\n`;
+                    todosNumeros.push({ numero, nome });
                 });
             });
 
-            // RESUMO
+            todosNumeros.sort((a, b) => a.numero - b.numero);
+
+            let txt = '';
+            
+            todosNumeros.forEach(item => {
+                txt += `${item.numero} - ${item.nome}\n`;
+            });
+
             txt += '\n';
             txt += '='.repeat(80) + '\n';
             txt += 'RESUMO\n';
@@ -881,7 +886,8 @@
             sales.forEach(sale => {
                 const nome = sale.buyer_name;
                 const numeros = sale.numbers || [];
-                txt += `${nome} = ${numeros.join(', ')}\n`;
+                const numerosOrdenados = [...numeros].sort((a, b) => a - b);
+                txt += `${nome} = ${numerosOrdenados.join(', ')}\n`;
             });
 
             const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
