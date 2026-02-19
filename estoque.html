@@ -13,13 +13,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        @font-face {
-            font-family: 'Kenyan Coffee';
-            src: url('fonts/KENYAN_COFFEE_RG.TTF') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -97,11 +90,13 @@
         }
 
         .title {
-            font-family: 'Kenyan Coffee', sans-serif;
-            font-size: 28px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
             color: var(--purple);
             margin-bottom: 10px;
             text-shadow: 0 0 20px var(--purple-glow);
+            letter-spacing: 2px;
         }
 
         .subtitle {
@@ -477,13 +472,8 @@
         if (stored) {
             return JSON.parse(stored);
         }
-        // Cards padrão
-        return [
-            'images/card1.jpeg',
-            'images/card2.jpeg',
-            'images/card3.jpeg',
-            'images/card4.jpeg'
-        ];
+        // SEM cards padrão - começa vazio
+        return [];
     }
 
     function saveCards(cards) {
@@ -500,9 +490,11 @@
     function loadCard(index) {
         if (cards.length === 0) {
             cardImage.src = '';
-            pageIndicator.textContent = 'Nenhum card';
+            cardImage.style.display = 'none';
+            pageIndicator.innerHTML = '<div style="text-align:center;padding:40px;"><p style="font-size:24px;color:var(--purple);margin-bottom:15px;">📦 Nenhum Card Ainda</p><p style="color:rgba(255,255,255,0.6);">Use o painel admin para adicionar cards</p></div>';
             return;
         }
+        cardImage.style.display = 'block';
         cardImage.src = cards[index];
         pageIndicator.textContent = `PAG ${index + 1}`;
     }
