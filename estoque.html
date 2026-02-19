@@ -204,12 +204,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
             z-index: 100;
-            opacity: 0;
+            opacity: 0.5;
         }
 
         .admin-btn:hover {
             background: rgba(255, 255, 255, 0.2);
             opacity: 1;
+            transform: scale(1.1);
         }
 
         /* ADMIN PANEL */
@@ -513,8 +514,29 @@
 
     // ADMIN FUNCTIONS
     async function openAdminPanel() {
+        console.log('🔵 openAdminPanel chamado');
+        console.log('window.ENV:', window.ENV);
+        
         if (!window.ENV || !window.ENV.ADMIN_HASH) {
-            alert('❌ Configurações não carregadas. Recarregue a página (Ctrl+Shift+R).');
+            console.error('❌ ENV não existe ou não tem ADMIN_HASH');
+            console.log('window.ENV completo:', window.ENV);
+            
+            // FALLBACK: Pedir senha do admin diretamente
+            const senha = prompt('⚠️ ENV não carregado!\n\nDigite a senha de admin:');
+            if (!senha) return;
+            
+            const hash = await hashPassword(senha);
+            console.log('Hash gerado:', hash);
+            
+            // Hash do "borjao777"
+            const HASH_ESPERADO = '696ea62c692fb3a36f2307316f97c14ba40368b2bcbe8eeb02e5dab7d41da9984';
+            
+            if (hash === HASH_ESPERADO) {
+                document.getElementById('adminPanel').classList.add('active');
+                loadAdminCards();
+            } else {
+                alert('❌ Senha incorreta!');
+            }
             return;
         }
 
