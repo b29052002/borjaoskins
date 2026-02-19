@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>Skins em Estoque - Borjão Skins</title>
 
+    <!-- ENV PRIMEIRO - SEM ASYNC -->
+    <script src="/.netlify/functions/env"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -398,9 +401,6 @@
     </style>
 </head>
 <body>
-<!-- Carregar ENV -->
-<script src="/.netlify/functions/env" async></script>
-
 <div class="bg-animation"></div>
 
 <button class="back-btn" onclick="window.location.href='index.html'">← Voltar</button>
@@ -409,7 +409,7 @@
 <div class="container">
     <div class="header">
         <div class="logo">
-            <img src="images/logodb.png" alt="Borjão Skins">
+            <img src="images/logoskins.png" alt="Borjão Skins">
         </div>
         <h1 class="title">SKINS EM ESTOQUE</h1>
         <p class="subtitle">Navegue pelas páginas para ver todas as skins disponíveis</p>
@@ -464,22 +464,6 @@
 </div>
 
 <script>
-    // ==========================================
-    // AGUARDAR ENV CARREGAR
-    // ==========================================
-    async function waitForEnv(maxAttempts = 30) {
-        for (let i = 0; i < maxAttempts; i++) {
-            if (window.ENV && window.ENV.ADMIN_HASH) {
-                console.log('✅ ENV carregado na tentativa', i + 1);
-                return true;
-            }
-            console.log('⏳ Aguardando ENV... tentativa', i + 1);
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        console.error('❌ ENV não carregou após', maxAttempts, 'tentativas');
-        return false;
-    }
-
     async function hashPassword(password) {
         const msgBuffer = new TextEncoder().encode(password);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -537,11 +521,8 @@
 
     // ADMIN FUNCTIONS
     async function openAdminPanel() {
-        // Aguardar ENV carregar
-        const envLoaded = await waitForEnv();
-        
-        if (!envLoaded) {
-            alert('❌ Erro ao carregar configurações. Recarregue a página.');
+        if (!window.ENV || !window.ENV.ADMIN_HASH) {
+            alert('❌ Configurações não carregadas. Recarregue a página (Ctrl+Shift+R).');
             return;
         }
 
