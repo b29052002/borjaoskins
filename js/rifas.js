@@ -6,19 +6,6 @@
     let currentRaffle = null;
     let selectedNumbers = new Set();
     let soldNumbers = new Set();
-
-    async function waitForEnv(maxAttempts = 10) {
-        for (let i = 0; i < maxAttempts; i++) {
-            if (window.ENV && window.ENV.SUPABASE_URL && window.ENV.SUPABASE_KEY) {
-                console.log('✅ ENV carregado na tentativa', i + 1);
-                return true;
-            }
-            console.log('⏳ Aguardando ENV... tentativa', i + 1);
-            await new Promise(resolve => setTimeout(resolve, 300));
-        }
-        return false;
-    }
-
     function initSupabase() {
         try {
             if (!window.supabase) {
@@ -48,29 +35,14 @@
     async function init() {
         console.log('🔵 Iniciando aplicação...');
 
-       
-        const envLoaded = await waitForEnv();
-        
-        if (!envLoaded) {
-            console.error('❌ ENV não carregou');
-            document.getElementById('loadingMessage').innerHTML = 
-                '<div style="text-align:center;padding:60px 20px;">' +
-                '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
-                '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro de Configuração</h2>' +
-                '<p style="color:rgba(255,255,255,0.7);margin-bottom:20px;">Não foi possível carregar as configurações.</p>' +
-                '<button onclick="location.reload()" style="background:var(--purple);color:white;border:none;padding:15px 30px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;">🔄 Recarregar</button>' +
-                '</div>';
-            return;
-        }
-
-        // Inicializar Supabase
+        // Tentar inicializar Supabase direto (sem esperar ENV)
         if (!initSupabase()) {
             console.error('❌ Falha ao inicializar Supabase');
             document.getElementById('loadingMessage').innerHTML = 
                 '<div style="text-align:center;padding:60px 20px;">' +
                 '<div style="font-size:64px;margin-bottom:20px;color:#ff4444;">⚠️</div>' +
-                '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro de Conexão</h2>' +
-                '<p style="color:rgba(255,255,255,0.7);margin-bottom:20px;">Não foi possível conectar ao servidor.</p>' +
+                '<h2 style="font-size:24px;color:#ff4444;margin-bottom:15px;">Erro de Configuração</h2>' +
+                '<p style="color:rgba(255,255,255,0.7);margin-bottom:20px;">ENV não carregou. Recarregue (Ctrl+Shift+R).</p>' +
                 '<button onclick="location.reload()" style="background:var(--purple);color:white;border:none;padding:15px 30px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;">🔄 Recarregar</button>' +
                 '</div>';
             return;
@@ -696,7 +668,7 @@
             if (error) throw error;
 
             alert('✅ Configurações salvas!');
-            await loadRaffle();
+            await loadRaffleWithAbort(new AbortController().signal);
             await loadSoldNumbers();
             renderNumbers();
 
@@ -1303,5 +1275,9 @@
         });
     }
 
-    init();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        setTimeout(init, 100);
+    }
 })();
