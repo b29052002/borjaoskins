@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <title>Skins em Estoque - Borjão Skins</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script src="/.netlify/functions/env"></script>
+
+    <style>
+        @font-face {
+            font-family: 'Kenyan Coffee';
+            src: url('fonts/KENYAN_COFFEE_RG.TTF') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --purple: #9431ce;
+            --black: #000000;
+            --dark-gray: #0a0a0a;
+            --purple-glow: rgba(148, 49, 206, 0.4);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--black);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-animation {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 50%, var(--purple-glow) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--purple-glow) 0%, transparent 50%);
+            animation: bgRotate 20s linear infinite;
+        }
+
+        @keyframes bgRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 30px var(--purple-glow));
+        }
+
+        .title {
+            font-family: 'Kenyan Coffee', sans-serif;
+            font-size: 28px;
+            color: var(--purple);
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px var(--purple-glow);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        .card-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .card {
+            position: relative;
+            max-width: 600px;
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(148, 49, 206, 0.1), rgba(0, 0, 0, 0.3));
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(148, 49, 206, 0.3);
+            border: 2px solid rgba(148, 49, 206, 0.3);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 15px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--purple), #6b1fa0);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(148, 49, 206, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(148, 49, 206, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .page-indicator {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--purple);
+            text-shadow: 0 0 10px var(--purple-glow);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(148, 49, 206, 0.2);
+            border: 2px solid var(--purple);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-btn:hover {
+            background: var(--purple);
+            transform: translateX(-5px);
+        }
+
+        .admin-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .admin-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ADMIN PANEL */
+        .admin-panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--purple);
+        }
+
+        .close-btn {
+            background: rgba(255, 68, 68, 0.2);
+            border: 2px solid #ff4444;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #ff4444;
+        }
+
+        .admin-section {
+            background: rgba(148, 49, 206, 0.1);
+            border: 2px solid rgba(148, 49, 206, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .admin-section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: 20px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(148, 49, 206, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card-preview {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-delete:hover {
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            text-align: center;
+        }
+
+        .upload-label {
+            display: block;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .btn-upload {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff88, #00dd77);
+            color: black;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-container {
+            margin-top: 30px;
+        }
+
+        .preview-image {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 10px;
+            border: 2px solid var(--purple);
+            margin-bottom: 20px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--purple), #6b1fa0);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 24px;
+            }
+
+            .btn {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="bg-animation"></div>
+
+<button class="back-btn" onclick="window.location.href='index.html'">← Voltar</button>
+<button class="admin-btn" onclick="openAdminPanel()">⚙️ Admin</button>
+
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            <img src="images/logoskins.png" alt="Borjão Skins">
+        </div>
+        <h1 class="title">SKINS EM ESTOQUE</h1>
+        <p class="subtitle">Navegue pelas páginas para ver todas as skins disponíveis</p>
+    </div>
+
+    <div class="card-container">
+        <div class="card">
+            <img id="cardImage" class="card-image" src="" alt="Card">
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="previousCard()">← Anterior</button>
+        <button class="btn" onclick="nextCard()">Próxima →</button>
+    </div>
+
+    <div class="page-indicator" id="pageIndicator">PAG 1</div>
+</div>
+
+<div class="admin-panel" id="adminPanel">
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">⚙️ Painel Administrativo</h1>
+            <button class="close-btn" onclick="closeAdminPanel()">✕ Fechar</button>
+        </div>
+
+        <div class="admin-section">
+            <h2 class="admin-section-title">📦 Cards Atuais</h2>
+            <div class="cards-grid" id="cardsGrid"></div>
+        </div>
+
+        <div class="admin-section">
+            <h2 class="admin-section-title">➕ Adicionar Novo Card</h2>
+            <div class="upload-section">
+                <label class="upload-label">Escolha uma imagem para o novo card</label>
+                <label for="fileInput" class="btn-upload">
+                    📁 Selecionar Imagem
+                </label>
+                <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
+                
+                <div class="preview-container" id="previewContainer" style="display: none;">
+                    <img id="previewImage" class="preview-image" alt="Preview">
+                    <br>
+                    <button class="btn-save" onclick="saveNewCard()">💾 Salvar Card</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // AGUARDAR ENV CARREGAR
+    // ==========================================
+    async function waitForEnv(maxAttempts = 10) {
+        for (let i = 0; i < maxAttempts; i++) {
+            if (window.ENV && window.ENV.ADMIN_HASH) {
+                console.log('✅ ENV carregado');
+                return true;
+            }
+            console.log('⏳ Aguardando ENV...');
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+        return false;
+    }
+
+    async function hashPassword(password) {
+        const msgBuffer = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function getCards() {
+        const stored = localStorage.getItem('estoqueCards');
+        if (stored) {
+            return JSON.parse(stored);
+        }
+        return [
+            'images/card1.jpeg',
+            'images/card2.jpeg',
+            'images/card3.jpeg',
+            'images/card4.jpeg'
+        ];
+    }
+
+    function saveCards(cards) {
+        localStorage.setItem('estoqueCards', JSON.stringify(cards));
+    }
+
+    let cards = getCards();
+    let currentCard = 0;
+    let newCardData = null;
+
+    const cardImage = document.getElementById('cardImage');
+    const pageIndicator = document.getElementById('pageIndicator');
+
+    function loadCard(index) {
+        if (cards.length === 0) {
+            cardImage.src = '';
+            pageIndicator.textContent = 'Nenhum card';
+            return;
+        }
+        cardImage.src = cards[index];
+        pageIndicator.textContent = `PAG ${index + 1}`;
+    }
+
+    function nextCard() {
+        if (cards.length === 0) return;
+        currentCard = (currentCard + 1) % cards.length;
+        loadCard(currentCard);
+    }
+
+    function previousCard() {
+        if (cards.length === 0) return;
+        currentCard = (currentCard - 1 + cards.length) % cards.length;
+        loadCard(currentCard);
+    }
+
+    async function openAdminPanel() {
+        const envLoaded = await waitForEnv();
+        
+        if (!envLoaded) {
+            alert('❌ Erro ao carregar configurações. Recarregue a página.');
+            return;
+        }
+
+        const password = prompt('🔐 Senha de Administrador:');
+        if (!password) return;
+        
+        const hash = await hashPassword(password);
+        
+        if (hash === window.ENV.ADMIN_HASH) {
+            document.getElementById('adminPanel').classList.add('active');
+            loadAdminCards();
+        } else {
+            alert('❌ Senha incorreta!');
+        }
+    }
+
+    function closeAdminPanel() {
+        document.getElementById('adminPanel').classList.remove('active');
+        newCardData = null;
+        document.getElementById('previewContainer').style.display = 'none';
+    }
+
+    function loadAdminCards() {
+        const grid = document.getElementById('cardsGrid');
+        
+        if (cards.length === 0) {
+            grid.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.5);">Nenhum card ainda</p>';
+            return;
+        }
+
+        grid.innerHTML = cards.map((card, index) => `
+            <div class="card-item">
+                <img src="${card}" class="card-preview" alt="Card ${index + 1}">
+                <div class="card-name">PAG ${index + 1}</div>
+                <button class="btn-delete" onclick="deleteCard(${index})">🗑️ Excluir</button>
+            </div>
+        `).join('');
+    }
+
+    function deleteCard(index) {
+        if (!confirm(`Tem certeza que deseja excluir a PAG ${index + 1}?`)) {
+            return;
+        }
+
+        cards.splice(index, 1);
+        saveCards(cards);
+        
+        if (currentCard >= cards.length) {
+            currentCard = Math.max(0, cards.length - 1);
+        }
+        
+        loadCard(currentCard);
+        loadAdminCards();
+        alert('✅ Card excluído com sucesso!');
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            newCardData = e.target.result;
+            document.getElementById('previewImage').src = newCardData;
+            document.getElementById('previewContainer').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function saveNewCard() {
+        if (!newCardData) {
+            alert('❌ Selecione uma imagem primeiro!');
+            return;
+        }
+
+        cards.push(newCardData);
+        saveCards(cards);
+        
+        // Limpar preview
+        newCardData = null;
+        document.getElementById('previewContainer').style.display = 'none';
+        document.getElementById('fileInput').value = '';
+        
+        loadAdminCards();
+        alert('✅ Card adicionado com sucesso!');
+    }
+
+    // Inicializar
+    loadCard(currentCard);
+</script>
+
+</body>
+</html>
