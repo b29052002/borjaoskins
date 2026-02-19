@@ -9,8 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-    <script src="/.netlify/functions/env"></script>
-
     <style>
         @font-face {
             font-family: 'Kenyan Coffee';
@@ -208,10 +206,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
             z-index: 100;
+            opacity: 0;
         }
 
         .admin-btn:hover {
             background: rgba(255, 255, 255, 0.2);
+            opacity: 1;
         }
 
         /* ADMIN PANEL */
@@ -398,6 +398,9 @@
     </style>
 </head>
 <body>
+<!-- Carregar ENV -->
+<script src="/.netlify/functions/env" async></script>
+
 <div class="bg-animation"></div>
 
 <button class="back-btn" onclick="window.location.href='index.html'">← Voltar</button>
@@ -426,6 +429,7 @@
     <div class="page-indicator" id="pageIndicator">PAG 1</div>
 </div>
 
+<!-- ADMIN PANEL -->
 <div class="admin-panel" id="adminPanel">
     <div class="admin-container">
         <div class="admin-header">
@@ -433,11 +437,13 @@
             <button class="close-btn" onclick="closeAdminPanel()">✕ Fechar</button>
         </div>
 
+        <!-- Cards Atuais -->
         <div class="admin-section">
             <h2 class="admin-section-title">📦 Cards Atuais</h2>
             <div class="cards-grid" id="cardsGrid"></div>
         </div>
 
+        <!-- Upload Novo Card -->
         <div class="admin-section">
             <h2 class="admin-section-title">➕ Adicionar Novo Card</h2>
             <div class="upload-section">
@@ -461,15 +467,16 @@
     // ==========================================
     // AGUARDAR ENV CARREGAR
     // ==========================================
-    async function waitForEnv(maxAttempts = 10) {
+    async function waitForEnv(maxAttempts = 30) {
         for (let i = 0; i < maxAttempts; i++) {
             if (window.ENV && window.ENV.ADMIN_HASH) {
-                console.log('✅ ENV carregado');
+                console.log('✅ ENV carregado na tentativa', i + 1);
                 return true;
             }
-            console.log('⏳ Aguardando ENV...');
-            await new Promise(resolve => setTimeout(resolve, 300));
+            console.log('⏳ Aguardando ENV... tentativa', i + 1);
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
+        console.error('❌ ENV não carregou após', maxAttempts, 'tentativas');
         return false;
     }
 
@@ -480,11 +487,13 @@
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    // Gerenciar cards no localStorage
     function getCards() {
         const stored = localStorage.getItem('estoqueCards');
         if (stored) {
             return JSON.parse(stored);
         }
+        // Cards padrão
         return [
             'images/card1.jpeg',
             'images/card2.jpeg',
@@ -526,7 +535,9 @@
         loadCard(currentCard);
     }
 
+    // ADMIN FUNCTIONS
     async function openAdminPanel() {
+        // Aguardar ENV carregar
         const envLoaded = await waitForEnv();
         
         if (!envLoaded) {
