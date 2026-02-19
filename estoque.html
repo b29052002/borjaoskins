@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>Skins em Estoque - Borjão Skins</title>
 
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- ENV -->
     <script src="/.netlify/functions/env"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,8 +80,8 @@
         }
 
         .logo {
-            width: 80px;
-            height: 80px;
+            width: 150px;
+            height: 150px;
             margin: 0 auto 15px;
         }
 
@@ -110,25 +114,68 @@
             align-items: center;
             justify-content: center;
             margin: 20px 0;
+            overflow: hidden;
         }
 
         .card {
             position: relative;
-            max-width: 600px;
             width: 100%;
-            aspect-ratio: 1;
+            max-width: 800px;
+            height: 70vh;
             background: linear-gradient(135deg, rgba(148, 49, 206, 0.1), rgba(0, 0, 0, 0.3));
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 20px 60px rgba(148, 49, 206, 0.3);
             border: 2px solid rgba(148, 49, 206, 0.3);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .card::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .card::-webkit-scrollbar-track {
+            background: rgba(148, 49, 206, 0.1);
+            border-radius: 10px;
+        }
+
+        .card::-webkit-scrollbar-thumb {
+            background: var(--purple);
+            border-radius: 10px;
+        }
+
+        .card::-webkit-scrollbar-thumb:hover {
+            background: #6b1fa0;
         }
 
         .card-image {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
+            height: auto;
+            display: block;
             border-radius: 15px;
+            cursor: zoom-in;
+        }
+
+        .card-image.zoomed {
+            cursor: zoom-out;
+            transform: scale(1.5);
+            transform-origin: center;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-message p:first-child {
+            font-size: 24px;
+            color: var(--purple);
+            margin-bottom: 15px;
+        }
+
+        .empty-message p:last-child {
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .controls {
@@ -158,6 +205,11 @@
 
         .btn:active {
             transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .page-indicator {
@@ -210,6 +262,13 @@
             background: rgba(255, 255, 255, 0.2);
             opacity: 1;
             transform: scale(1.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 20px;
+            color: var(--purple);
         }
 
         /* ADMIN PANEL */
@@ -291,8 +350,8 @@
 
         .card-preview {
             width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
+            max-height: 300px;
+            object-fit: contain;
             border-radius: 8px;
             margin-bottom: 10px;
         }
@@ -358,6 +417,7 @@
 
         .preview-image {
             max-width: 400px;
+            max-height: 600px;
             width: 100%;
             border-radius: 10px;
             border: 2px solid var(--purple);
@@ -392,6 +452,11 @@
             .cards-grid {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
+
+            .logo {
+                width: 120px;
+                height: 120px;
+            }
         }
     </style>
 </head>
@@ -407,24 +472,24 @@
             <img src="images/logodb.png" alt="Borjão Skins">
         </div>
         <h1 class="title">SKINS EM ESTOQUE</h1>
-        <p class="subtitle">Navegue pelas páginas para ver todas as skins disponíveis</p>
+        <p class="subtitle">Navegue pelas páginas • Clique na imagem para zoom</p>
     </div>
 
     <div class="card-container">
-        <div class="card">
-            <img id="cardImage" class="card-image" src="" alt="Card">
+        <div class="card" id="cardContainer">
+            <div class="loading" id="loadingIndicator">⏳ Carregando...</div>
         </div>
     </div>
 
     <div class="controls">
-        <button class="btn" onclick="previousCard()">← Anterior</button>
-        <button class="btn" onclick="nextCard()">Próxima →</button>
+        <button class="btn" onclick="previousCard()" id="btnPrev">← Anterior</button>
+        <button class="btn" onclick="nextCard()" id="btnNext">Próxima →</button>
     </div>
 
-    <div class="page-indicator" id="pageIndicator">PAG 1</div>
+    <div class="page-indicator" id="pageIndicator">Carregando...</div>
 </div>
 
-<!-- ADMIN PANEL -->
+
 <div class="admin-panel" id="adminPanel">
     <div class="admin-container">
         <div class="admin-header">
@@ -432,13 +497,13 @@
             <button class="close-btn" onclick="closeAdminPanel()">✕ Fechar</button>
         </div>
 
-        <!-- Cards Atuais -->
+       
         <div class="admin-section">
             <h2 class="admin-section-title">📦 Cards Atuais</h2>
             <div class="cards-grid" id="cardsGrid"></div>
         </div>
 
-        <!-- Upload Novo Card -->
+    
         <div class="admin-section">
             <h2 class="admin-section-title">➕ Adicionar Novo Card</h2>
             <div class="upload-section">
@@ -459,6 +524,11 @@
 </div>
 
 <script>
+    let supabaseClient = null;
+    let cards = [];
+    let currentCard = 0;
+    let newCardData = null;
+
     async function hashPassword(password) {
         const msgBuffer = new TextEncoder().encode(password);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -466,37 +536,86 @@
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Gerenciar cards no localStorage
-    function getCards() {
-        const stored = localStorage.getItem('estoqueCards');
-        if (stored) {
-            return JSON.parse(stored);
+    // Inicializar Supabase
+    function initSupabase() {
+        if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_KEY) {
+            console.error('❌ ENV não disponível');
+            return false;
         }
-        // SEM cards padrão - começa vazio
-        return [];
+
+        supabaseClient = window.supabase.createClient(
+            window.ENV.SUPABASE_URL,
+            window.ENV.SUPABASE_KEY
+        );
+
+        console.log('✅ Supabase inicializado');
+        return true;
     }
 
-    function saveCards(cards) {
-        localStorage.setItem('estoqueCards', JSON.stringify(cards));
+    // Carregar cards do Supabase
+    async function loadCards() {
+        try {
+            const {data, error} = await supabaseClient
+                .from('estoque_cards')
+                .select('*')
+                .order('ordem', {ascending: true});
+
+            if (error) throw error;
+
+            cards = data || [];
+            console.log('✅ Cards carregados:', cards.length);
+            
+            if (cards.length > 0) {
+                currentCard = 0;
+                loadCard(currentCard);
+            } else {
+                showEmptyMessage();
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao carregar cards:', error);
+            showError('Erro ao carregar cards');
+        }
     }
-
-    let cards = getCards();
-    let currentCard = 0;
-    let newCardData = null;
-
-    const cardImage = document.getElementById('cardImage');
-    const pageIndicator = document.getElementById('pageIndicator');
 
     function loadCard(index) {
+        const container = document.getElementById('cardContainer');
+        const pageIndicator = document.getElementById('pageIndicator');
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+
         if (cards.length === 0) {
-            cardImage.src = '';
-            cardImage.style.display = 'none';
-            pageIndicator.innerHTML = '<div style="text-align:center;padding:40px;"><p style="font-size:24px;color:var(--purple);margin-bottom:15px;">📦 Nenhum Card Ainda</p><p style="color:rgba(255,255,255,0.6);">Use o painel admin para adicionar cards</p></div>';
+            showEmptyMessage();
+            btnPrev.disabled = true;
+            btnNext.disabled = true;
             return;
         }
-        cardImage.style.display = 'block';
-        cardImage.src = cards[index];
-        pageIndicator.textContent = `PAG ${index + 1}`;
+
+        btnPrev.disabled = false;
+        btnNext.disabled = false;
+
+        const card = cards[index];
+        container.innerHTML = `<img src="${card.image_url}" class="card-image" onclick="toggleZoom(this)" alt="Card ${index + 1}">`;
+        pageIndicator.textContent = `PAG ${index + 1} de ${cards.length}`;
+    }
+
+    function showEmptyMessage() {
+        document.getElementById('cardContainer').innerHTML = `
+            <div class="empty-message">
+                <p>📦 Nenhum Card Ainda</p>
+                <p>Use o painel admin para adicionar cards</p>
+            </div>
+        `;
+        document.getElementById('pageIndicator').textContent = 'Sem cards';
+    }
+
+    function showError(message) {
+        document.getElementById('cardContainer').innerHTML = `
+            <div class="empty-message">
+                <p>❌ Erro</p>
+                <p>${message}</p>
+            </div>
+        `;
     }
 
     function nextCard() {
@@ -511,31 +630,17 @@
         loadCard(currentCard);
     }
 
+    function toggleZoom(img) {
+        img.classList.toggle('zoomed');
+    }
+
     // ADMIN FUNCTIONS
     async function openAdminPanel() {
         console.log('🔵 openAdminPanel chamado');
-        console.log('window.ENV:', window.ENV);
         
         if (!window.ENV || !window.ENV.ADMIN_HASH) {
-            console.error('❌ ENV não existe ou não tem ADMIN_HASH');
-            console.log('window.ENV completo:', window.ENV);
-            
-            // FALLBACK: Pedir senha do admin diretamente
-            const senha = prompt('⚠️ ENV não carregado!\n\nDigite a senha de admin:');
-            if (!senha) return;
-            
-            const hash = await hashPassword(senha);
-            console.log('Hash gerado:', hash);
-            
-            // Hash do "borjao777"
-            const HASH_ESPERADO = '696ea62c692fb3a36f2307316f97c14ba40368b2bcbe8eeb02e5dab7d41da9984';
-            
-            if (hash === HASH_ESPERADO) {
-                document.getElementById('adminPanel').classList.add('active');
-                loadAdminCards();
-            } else {
-                alert('❌ Senha incorreta!');
-            }
+            console.error('❌ ENV não existe');
+            alert('❌ Configurações não carregadas. Recarregue (Ctrl+Shift+R).');
             return;
         }
 
@@ -558,7 +663,7 @@
         document.getElementById('previewContainer').style.display = 'none';
     }
 
-    function loadAdminCards() {
+    async function loadAdminCards() {
         const grid = document.getElementById('cardsGrid');
         
         if (cards.length === 0) {
@@ -568,28 +673,34 @@
 
         grid.innerHTML = cards.map((card, index) => `
             <div class="card-item">
-                <img src="${card}" class="card-preview" alt="Card ${index + 1}">
+                <img src="${card.image_url}" class="card-preview" alt="Card ${index + 1}">
                 <div class="card-name">PAG ${index + 1}</div>
-                <button class="btn-delete" onclick="deleteCard(${index})">🗑️ Excluir</button>
+                <button class="btn-delete" onclick="deleteCard('${card.id}')">🗑️ Excluir</button>
             </div>
         `).join('');
     }
 
-    function deleteCard(index) {
-        if (!confirm(`Tem certeza que deseja excluir a PAG ${index + 1}?`)) {
+    async function deleteCard(cardId) {
+        if (!confirm('Tem certeza que deseja excluir este card?')) {
             return;
         }
 
-        cards.splice(index, 1);
-        saveCards(cards);
-        
-        if (currentCard >= cards.length) {
-            currentCard = Math.max(0, cards.length - 1);
+        try {
+            const {error} = await supabaseClient
+                .from('estoque_cards')
+                .delete()
+                .eq('id', cardId);
+
+            if (error) throw error;
+
+            alert('✅ Card excluído com sucesso!');
+            await loadCards();
+            loadAdminCards();
+
+        } catch (error) {
+            console.error('Erro ao excluir:', error);
+            alert('❌ Erro ao excluir card: ' + error.message);
         }
-        
-        loadCard(currentCard);
-        loadAdminCards();
-        alert('✅ Card excluído com sucesso!');
     }
 
     function handleFileSelect(event) {
@@ -605,26 +716,58 @@
         reader.readAsDataURL(file);
     }
 
-    function saveNewCard() {
+    async function saveNewCard() {
         if (!newCardData) {
             alert('❌ Selecione uma imagem primeiro!');
             return;
         }
 
-        cards.push(newCardData);
-        saveCards(cards);
-        
-        // Limpar preview
-        newCardData = null;
-        document.getElementById('previewContainer').style.display = 'none';
-        document.getElementById('fileInput').value = '';
-        
-        loadAdminCards();
-        alert('✅ Card adicionado com sucesso!');
+        try {
+          
+            const nextOrdem = cards.length > 0 ? Math.max(...cards.map(c => c.ordem)) + 1 : 0;
+
+            const {data, error} = await supabaseClient
+                .from('estoque_cards')
+                .insert({
+                    image_url: newCardData,
+                    ordem: nextOrdem
+                })
+                .select();
+
+            if (error) throw error;
+
+            alert('✅ Card adicionado com sucesso!');
+            
+      
+            newCardData = null;
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            
+            await loadCards();
+            loadAdminCards();
+
+        } catch (error) {
+            console.error('Erro ao salvar:', error);
+            alert('❌ Erro ao salvar card: ' + error.message);
+        }
     }
 
-    // Inicializar
-    loadCard(currentCard);
+
+    async function init() {
+        console.log('🔵 Inicializando estoque...');
+
+        if (!initSupabase()) {
+            showError('Falha ao conectar ao banco de dados');
+            return;
+        }
+
+        await loadCards();
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 100));
+    } else {
+        setTimeout(init, 100);
+    }
 </script>
 
 </body>
