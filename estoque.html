@@ -124,11 +124,14 @@
             height: 70vh;
             background: linear-gradient(135deg, rgba(148, 49, 206, 0.1), rgba(0, 0, 0, 0.3));
             border-radius: 20px;
-            padding: 20px;
+            padding: 0;
             box-shadow: 0 20px 60px rgba(148, 49, 206, 0.3);
             border: 2px solid rgba(148, 49, 206, 0.3);
             overflow-y: auto;
             overflow-x: hidden;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
         }
 
         .card::-webkit-scrollbar {
@@ -153,14 +156,9 @@
             width: 100%;
             height: auto;
             display: block;
-            border-radius: 15px;
-            cursor: zoom-in;
-        }
-
-        .card-image.zoomed {
-            cursor: zoom-out;
-            transform: scale(1.5);
-            transform-origin: center;
+            border-radius: 0;
+            min-height: 100%;
+            object-fit: contain;
         }
 
         .empty-message {
@@ -469,10 +467,10 @@
 <div class="container">
     <div class="header">
         <div class="logo">
-            <img src="images/logodb.png" alt="Borjão Skins">
+            <img src="images/logoskins.png" alt="Borjão Skins">
         </div>
         <h1 class="title">SKINS EM ESTOQUE</h1>
-        <p class="subtitle">Navegue pelas páginas • Clique na imagem para zoom</p>
+        <p class="subtitle">Navegue pelas páginas usando os botões</p>
     </div>
 
     <div class="card-container">
@@ -489,7 +487,7 @@
     <div class="page-indicator" id="pageIndicator">Carregando...</div>
 </div>
 
-
+<!-- ADMIN PANEL -->
 <div class="admin-panel" id="adminPanel">
     <div class="admin-container">
         <div class="admin-header">
@@ -497,13 +495,13 @@
             <button class="close-btn" onclick="closeAdminPanel()">✕ Fechar</button>
         </div>
 
-       
+        <!-- Cards Atuais -->
         <div class="admin-section">
             <h2 class="admin-section-title">📦 Cards Atuais</h2>
             <div class="cards-grid" id="cardsGrid"></div>
         </div>
 
-    
+        <!-- Upload Novo Card -->
         <div class="admin-section">
             <h2 class="admin-section-title">➕ Adicionar Novo Card</h2>
             <div class="upload-section">
@@ -595,7 +593,7 @@
         btnNext.disabled = false;
 
         const card = cards[index];
-        container.innerHTML = `<img src="${card.image_url}" class="card-image" onclick="toggleZoom(this)" alt="Card ${index + 1}">`;
+        container.innerHTML = `<img src="${card.image_url}" class="card-image" alt="Card ${index + 1}">`;
         pageIndicator.textContent = `PAG ${index + 1} de ${cards.length}`;
     }
 
@@ -628,10 +626,6 @@
         if (cards.length === 0) return;
         currentCard = (currentCard - 1 + cards.length) % cards.length;
         loadCard(currentCard);
-    }
-
-    function toggleZoom(img) {
-        img.classList.toggle('zoomed');
     }
 
     // ADMIN FUNCTIONS
@@ -717,14 +711,20 @@
     }
 
     async function saveNewCard() {
+        console.log('🔵 saveNewCard chamado');
+        console.log('newCardData existe?', !!newCardData);
+        
         if (!newCardData) {
             alert('❌ Selecione uma imagem primeiro!');
             return;
         }
 
         try {
-          
+            console.log('📤 Salvando no Supabase...');
+            
+            // Pegar próxima ordem
             const nextOrdem = cards.length > 0 ? Math.max(...cards.map(c => c.ordem)) + 1 : 0;
+            console.log('Próxima ordem:', nextOrdem);
 
             const {data, error} = await supabaseClient
                 .from('estoque_cards')
@@ -734,11 +734,15 @@
                 })
                 .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Erro do Supabase:', error);
+                throw error;
+            }
 
+            console.log('✅ Card salvo:', data);
             alert('✅ Card adicionado com sucesso!');
             
-      
+            // Limpar preview
             newCardData = null;
             document.getElementById('previewContainer').style.display = 'none';
             document.getElementById('fileInput').value = '';
@@ -747,12 +751,12 @@
             loadAdminCards();
 
         } catch (error) {
-            console.error('Erro ao salvar:', error);
+            console.error('❌ Erro ao salvar:', error);
             alert('❌ Erro ao salvar card: ' + error.message);
         }
     }
 
-
+    // Inicializar
     async function init() {
         console.log('🔵 Inicializando estoque...');
 
@@ -763,6 +767,8 @@
 
         await loadCards();
     }
+
+    // Aguardar DOM e ENV
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => setTimeout(init, 100));
     } else {
