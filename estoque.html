@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>Skins em Estoque - Borjão Skins</title>
 
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
+    <!-- ENV -->
     <script src="/.netlify/functions/env"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -131,24 +132,13 @@
             display: flex;
             align-items: flex-start;
             justify-content: center;
+            -webkit-overflow-scrolling: touch;
         }
 
+        /* Scrollbar invisível */
         .card::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .card::-webkit-scrollbar-track {
-            background: rgba(148, 49, 206, 0.1);
-            border-radius: 10px;
-        }
-
-        .card::-webkit-scrollbar-thumb {
-            background: var(--purple);
-            border-radius: 10px;
-        }
-
-        .card::-webkit-scrollbar-thumb:hover {
-            background: #6b1fa0;
+            width: 0;
+            height: 0;
         }
 
         .card-image {
@@ -158,6 +148,7 @@
             border-radius: 0;
             min-height: 100%;
             object-fit: contain;
+            touch-action: pan-y pinch-zoom;
         }
 
         .empty-message {
@@ -243,22 +234,24 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
             padding: 12px 20px;
             border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             z-index: 100;
-            opacity: 0.5;
+            opacity: 0.2;
         }
 
         .admin-btn:hover {
             background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
             opacity: 1;
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
         .loading {
@@ -466,7 +459,7 @@
 <div class="container">
     <div class="header">
         <div class="logo">
-            <img src="images/logodb.png" alt="Borjão Skins">
+            <img src="images/logoskins.png" alt="Borjão Skins">
         </div>
         <h1 class="title">SKINS EM ESTOQUE</h1>
         <p class="subtitle">Navegue pelas páginas usando os botões</p>
@@ -712,8 +705,8 @@
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                // Largura máxima: 1200px (mantém proporção)
-                const maxWidth = 1200;
+                // Largura máxima: 1600px (alta qualidade)
+                const maxWidth = 1600;
                 let width = img.width;
                 let height = img.height;
                 
@@ -728,11 +721,11 @@
                 // Desenhar imagem redimensionada
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // Converter para base64 com qualidade 0.8
-                newCardData = canvas.toDataURL('image/jpeg', 0.8);
+                // Converter para base64 com qualidade 0.95 (95% - ALTA QUALIDADE)
+                newCardData = canvas.toDataURL('image/jpeg', 0.95);
                 
                 const compressedSize = (newCardData.length / 1024 / 1024).toFixed(2);
-                console.log('✅ Imagem comprimida:', width, 'x', height, 'Tamanho:', compressedSize, 'MB');
+                console.log('✅ Imagem processada:', width, 'x', height, 'Tamanho:', compressedSize, 'MB');
                 
                 document.getElementById('previewImage').src = newCardData;
                 document.getElementById('previewContainer').style.display = 'block';
