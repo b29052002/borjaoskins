@@ -3,19 +3,16 @@
     padding: 0;
     box-sizing: border-box;
 }
-
 a {
     outline: none;
     border: none;
     -webkit-tap-highlight-color: transparent;
 }
-
 :root {
     --purple: #9431ce;
     --black: #000000;
     --purple-glow: rgba(148, 49, 206, 0.4);
 }
-
 body {
     font-family: 'Rajdhani', sans-serif;
     background: var(--black);
@@ -25,14 +22,12 @@ body {
     justify-content: center;
     overflow: hidden;
 }
-
-
+/* FUNDO */
 .bg-animation {
     position: fixed;
     inset: 0;
     z-index: 0;
 }
-
 .bg-animation::before {
     content: '';
     position: absolute;
@@ -45,13 +40,11 @@ body {
         radial-gradient(circle at 80% 80%, var(--purple-glow) 0%, transparent 50%);
     animation: bgRotate 20s linear infinite;
 }
-
 @keyframes bgRotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-
-
+/* CONTAINER COM SCALE */
 .container {
     position: relative;
     z-index: 2;
@@ -63,61 +56,51 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     transform-origin: top center;
 }
-
-
+/* LOGO GRANDE */
 .logo {
     width: 250px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
-
 .logo img {
     width: 100%;
     display: block;
 }
-
-
+/* BOTÕES GRANDES - MAIS JUNTOS */
 .main-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 6px;
+    gap: 2px;
+    margin-bottom: 3px;
 }
-
 .btn-main {
     width: 100%;
     line-height: 0;
 }
-
-
+/* GRID - MAIS ESPAÇADO */
 .social-grid {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    margin-bottom: 6px;
+    gap: 8px;
+    margin-bottom: 3px;
 }
-
 .btn-social {
     line-height: 0;
 }
-
-
+/* BOTÃO FINAL */
 .bottom-center {
     width: 100%;
     display: flex;
     justify-content: center;
 }
-
 .btn-bottom {
     width: 55%;
     line-height: 0;
 }
-
-
+/* MIDIA */
 .btn-media {
     width: 100%;
     height: auto;
@@ -125,24 +108,28 @@ body {
     object-fit: contain;
     pointer-events: none;
 }
-
-
+/* ===== AJUSTE POR ALTURA (MAGIA AQUI) ===== */
 @media (max-height: 800px) {
     .container { transform: scale(0.95); }
-    .logo { width: 220px; }
+    .logo { width: 220px; margin-bottom: 3px; }
+    .main-buttons { gap: 2px; margin-bottom: 2px; }
+    .social-grid { gap: 6px; margin-bottom: 2px; }
 }
-
 @media (max-height: 700px) {
     .container { transform: scale(0.9); }
-    .logo { width: 200px; }
+    .logo { width: 200px; margin-bottom: 2px; }
+    .main-buttons { gap: 1px; margin-bottom: 2px; }
+    .social-grid { gap: 5px; margin-bottom: 2px; }
 }
-
 @media (max-height: 620px) {
     .container { transform: scale(0.85); }
-    .logo { width: 180px; }
+    .logo { width: 180px; margin-bottom: 2px; }
+    .main-buttons { gap: 1px; margin-bottom: 1px; }
+    .social-grid { gap: 4px; margin-bottom: 1px; }
 }
-
 @media (max-height: 560px) {
     .container { transform: scale(0.8); }
-    .logo { width: 160px; }
+    .logo { width: 160px; margin-bottom: 1px; }
+    .main-buttons { gap: 1px; margin-bottom: 1px; }
+    .social-grid { gap: 3px; margin-bottom: 1px; }
 }
