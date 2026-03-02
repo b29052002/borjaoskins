@@ -72,12 +72,16 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 0;
     margin-bottom: 3px;
 }
 .btn-main {
     width: 100%;
     line-height: 0;
+    margin-bottom: -8px;
+}
+.btn-main:last-child {
+    margin-bottom: 0;
 }
 /* GRID - MAIS ESPAÇADO */
 .social-grid {
